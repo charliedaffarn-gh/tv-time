@@ -1,0 +1,105 @@
+import { posterUrl } from '../lib/tmdb'
+import { useShowDetails } from '../hooks/useShowDetails'
+import { useUpNext } from '../hooks/useUpNext'
+import type { UserShow } from '../types'
+
+interface ShowCardProps {
+  show: UserShow
+  onStartWatching: () => void
+  onMarkWatched: (season: number, episode: number) => void
+  onMoveToLibrary: () => void
+  onMoveToFinished: () => void
+  onRemove: () => void
+}
+
+export function ShowCard({
+  show,
+  onStartWatching,
+  onMarkWatched,
+  onMoveToLibrary,
+  onMoveToFinished,
+  onRemove,
+}: ShowCardProps) {
+  const { details } = useShowDetails(show.tmdb_id)
+  const upNext = useUpNext(
+    show.current_season,
+    show.current_episode,
+    show.status === 'watching' ? details : null,
+  )
+
+  const poster = posterUrl(show.poster_path, 'w342')
+
+  return (
+    <div className="flex flex-col overflow-hidden rounded-xl bg-neutral-900 shadow-lg">
+      <div className="aspect-[2/3] w-full bg-neutral-800">
+        {poster ? (
+          <img src={poster} alt={show.title} className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full items-center justify-center px-2 text-center text-sm text-neutral-500">
+            {show.title}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col gap-2 p-3">
+        <p className="line-clamp-2 font-medium text-neutral-100">{show.title}</p>
+
+        {show.status === 'watching' && (
+          <div className="flex flex-1 flex-col justify-between gap-2">
+            <p className="text-xs text-neutral-400">
+              {upNext === undefined && 'Loading…'}
+              {upNext === null && 'All caught up'}
+              {upNext && (
+                <>
+                  Up next: S{upNext.season}E{upNext.episode}
+                  {upNext.name ? ` — ${upNext.name}` : ''}
+                </>
+              )}
+            </p>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+              <button
+                disabled={!upNext}
+                onClick={() => upNext && onMarkWatched(upNext.season, upNext.episode)}
+                className="rounded-md bg-indigo-600 px-2 py-1 font-medium text-white hover:bg-indigo-500 disabled:opacity-40"
+              >
+                Mark watched
+              </button>
+              <button onClick={onMoveToFinished} className="text-neutral-400 hover:text-neutral-200">
+                Finished
+              </button>
+              <button onClick={onMoveToLibrary} className="text-neutral-400 hover:text-neutral-200">
+                Back to library
+              </button>
+            </div>
+          </div>
+        )}
+
+        {show.status === 'library' && (
+          <div className="mt-auto flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            <button
+              onClick={onStartWatching}
+              className="rounded-md bg-indigo-600 px-2 py-1 font-medium text-white hover:bg-indigo-500"
+            >
+              Start watching
+            </button>
+            <button onClick={onRemove} className="text-neutral-500 hover:text-neutral-300">
+              Remove
+            </button>
+          </div>
+        )}
+
+        {show.status === 'finished' && (
+          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+            <span className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-400">Finished</span>
+            <button onClick={onMoveToLibrary} className="text-neutral-400 hover:text-neutral-200">
+              Watch again
+            </button>
+            <button onClick={onRemove} className="text-neutral-500 hover:text-neutral-300">
+              Remove
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
