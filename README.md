@@ -23,9 +23,14 @@ login for yourself and each friend directly in Supabase (see below).
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. In the SQL Editor, run the contents of `supabase/migrations/0001_init.sql`.
-3. In **Project Settings -> API**, copy the **Project URL** and **anon public
-   key** — you'll need both below.
-4. In **Authentication -> Users**, click **Add user** to create a login
+3. In **Project Settings -> API Keys**, copy the **Publishable key**
+   (`sb_publishable_...`). You don't need the secret key for this app.
+4. For the **Project URL**, use the **Connect** button at the top of your
+   project's dashboard (any framework preset shows it pre-filled), or check
+   **Project Settings -> Data API**. It's always `https://<project-ref>.supabase.co`
+   — the `<project-ref>` is also the string in your dashboard's own address bar
+   (`.../project/<project-ref>/...`) if you'd rather just read it off there.
+5. In **Authentication -> Users**, click **Add user** to create a login
    (email + password) for yourself and anyone else you want to invite. To
    add another friend later, just add another user here — no code changes.
    Email confirmation can be left off for invite-only use, or left on if
@@ -44,7 +49,7 @@ Copy `.env.example` to `.env` and fill in the three values from above:
 
 ```
 VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+VITE_SUPABASE_PUBLISHABLE_KEY=
 TMDB_API_KEY=
 ```
 
