@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { tmdbFetch } from '../_lib/tmdb'
-import { getAuthedUserId } from '../_lib/auth'
+import { tmdbFetch } from '../_lib/tmdb.js'
+import { getAuthedUserId } from '../_lib/auth.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
