@@ -7,10 +7,16 @@ export interface UserShow {
   title: string
   poster_path: string | null
   status: ShowStatus
-  current_season: number
-  current_episode: number
   created_at: string
   updated_at: string
+}
+
+export interface WatchedEpisode {
+  id: string
+  user_show_id: string
+  season_number: number
+  episode_number: number
+  watched_at: string
 }
 
 export interface TmdbSearchResult {
@@ -32,12 +38,16 @@ export interface TmdbEpisodeRef {
   episode_number: number
   name: string
   air_date: string | null
+  still_path: string | null
 }
 
 export interface TmdbShowDetails {
   id: number
   name: string
+  overview: string
   poster_path: string | null
+  backdrop_path: string | null
+  status: string
   number_of_seasons: number
   seasons: TmdbSeasonSummary[]
   next_episode_to_air: TmdbEpisodeRef | null

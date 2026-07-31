@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { ShowStatus, UserShow } from '../types'
+import type { ShowStatus, UserShow, WatchedEpisode } from '../types'
 
 export async function listUserShows(): Promise<UserShow[]> {
   const { data, error } = await supabase
@@ -8,6 +8,16 @@ export async function listUserShows(): Promise<UserShow[]> {
     .order('updated_at', { ascending: false })
   if (error) throw error
   return data as UserShow[]
+}
+
+export async function getUserShowByTmdbId(tmdbId: number): Promise<UserShow | null> {
+  const { data, error } = await supabase
+    .from('user_shows')
+    .select('*')
+    .eq('tmdb_id', tmdbId)
+    .maybeSingle()
+  if (error) throw error
+  return data as UserShow | null
 }
 
 export async function addShow(show: {
@@ -39,19 +49,52 @@ export async function setStatus(id: string, status: ShowStatus): Promise<void> {
   if (error) throw error
 }
 
-export async function advanceEpisode(
-  id: string,
+export async function removeShow(id: string): Promise<void> {
+  const { error } = await supabase.from('user_shows').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function listAllWatchedEpisodes(): Promise<WatchedEpisode[]> {
+  const { data, error } = await supabase.from('watched_episodes').select('*')
+  if (error) throw error
+  return data as WatchedEpisode[]
+}
+
+export async function listWatchedEpisodesForShow(userShowId: string): Promise<WatchedEpisode[]> {
+  const { data, error } = await supabase
+    .from('watched_episodes')
+    .select('*')
+    .eq('user_show_id', userShowId)
+  if (error) throw error
+  return data as WatchedEpisode[]
+}
+
+export async function markEpisodeWatched(
+  userShowId: string,
+  season: number,
+  episode: number,
+): Promise<void> {
+  const { error } = await supabase.from('watched_episodes').upsert(
+    {
+      user_show_id: userShowId,
+      season_number: season,
+      episode_number: episode,
+    },
+    { onConflict: 'user_show_id,season_number,episode_number', ignoreDuplicates: true },
+  )
+  if (error) throw error
+}
+
+export async function markEpisodeUnwatched(
+  userShowId: string,
   season: number,
   episode: number,
 ): Promise<void> {
   const { error } = await supabase
-    .from('user_shows')
-    .update({ current_season: season, current_episode: episode })
-    .eq('id', id)
-  if (error) throw error
-}
-
-export async function removeShow(id: string): Promise<void> {
-  const { error } = await supabase.from('user_shows').delete().eq('id', id)
+    .from('watched_episodes')
+    .delete()
+    .eq('user_show_id', userShowId)
+    .eq('season_number', season)
+    .eq('episode_number', episode)
   if (error) throw error
 }

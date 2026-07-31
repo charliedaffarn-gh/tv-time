@@ -22,7 +22,10 @@ login for yourself and each friend directly in Supabase (see below).
 ### 1. Supabase project
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In the SQL Editor, run the contents of `supabase/migrations/0001_init.sql`.
+2. In the SQL Editor, run the contents of `supabase/migrations/0001_init.sql`,
+   then `0002_episode_ledger.sql` (run them in order — the second depends on
+   the first). Whenever a new migration file is added later, run it the same
+   way.
 3. In **Project Settings -> API Keys**, copy the **Publishable key**
    (`sb_publishable_...`). You don't need the secret key for this app.
 4. For the **Project URL**, use the **Connect** button at the top of your

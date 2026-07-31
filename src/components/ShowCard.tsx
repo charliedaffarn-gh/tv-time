@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { posterUrl } from '../lib/tmdb'
 import { useShowDetails } from '../hooks/useShowDetails'
 import { useUpNext } from '../hooks/useUpNext'
@@ -5,6 +6,7 @@ import type { UserShow } from '../types'
 
 interface ShowCardProps {
   show: UserShow
+  watched: ReadonlySet<string>
   onStartWatching: () => void
   onMarkWatched: (season: number, episode: number) => void
   onMoveToLibrary: () => void
@@ -14,6 +16,7 @@ interface ShowCardProps {
 
 export function ShowCard({
   show,
+  watched,
   onStartWatching,
   onMarkWatched,
   onMoveToLibrary,
@@ -21,28 +24,28 @@ export function ShowCard({
   onRemove,
 }: ShowCardProps) {
   const { details } = useShowDetails(show.tmdb_id)
-  const upNext = useUpNext(
-    show.current_season,
-    show.current_episode,
-    show.status === 'watching' ? details : null,
-  )
+  const upNext = useUpNext(watched, show.status === 'watching' ? details : null)
 
   const poster = posterUrl(show.poster_path, 'w342')
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl bg-neutral-900 shadow-lg">
-      <div className="aspect-[2/3] w-full bg-neutral-800">
-        {poster ? (
-          <img src={poster} alt={show.title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full items-center justify-center px-2 text-center text-sm text-neutral-500">
-            {show.title}
-          </div>
-        )}
-      </div>
+      <Link to={`/show/${show.tmdb_id}`} className="block">
+        <div className="aspect-[2/3] w-full bg-neutral-800">
+          {poster ? (
+            <img src={poster} alt={show.title} className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center px-2 text-center text-sm text-neutral-500">
+              {show.title}
+            </div>
+          )}
+        </div>
+      </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-3">
-        <p className="line-clamp-2 font-medium text-neutral-100">{show.title}</p>
+        <Link to={`/show/${show.tmdb_id}`} className="line-clamp-2 font-medium text-neutral-100 hover:underline">
+          {show.title}
+        </Link>
 
         {show.status === 'watching' && (
           <div className="flex flex-1 flex-col justify-between gap-2">

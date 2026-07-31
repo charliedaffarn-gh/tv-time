@@ -1,15 +1,24 @@
 import { useCallback, useEffect, useState } from 'react'
-import { addShow, advanceEpisode, listUserShows, removeShow, setStatus } from '../lib/shows'
+import {
+  addShow,
+  listAllWatchedEpisodes,
+  listUserShows,
+  markEpisodeWatched,
+  removeShow,
+  setStatus,
+} from '../lib/shows'
+import { episodeKey } from '../lib/nextEpisode'
 import { useAuth } from '../contexts/useAuth'
 import { AddShowModal } from './AddShowModal'
 import { ShowCard } from './ShowCard'
 import { TabBar } from './TabBar'
 import { UpcomingStrip } from './UpcomingStrip'
-import type { ShowStatus, TmdbSearchResult, UserShow } from '../types'
+import type { ShowStatus, TmdbSearchResult, UserShow, WatchedEpisode } from '../types'
 
 export function Dashboard() {
   const { signOut } = useAuth()
   const [shows, setShows] = useState<UserShow[]>([])
+  const [watchedByShow, setWatchedByShow] = useState<Map<string, Set<string>>>(new Map())
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<ShowStatus>('watching')
   const [showAddModal, setShowAddModal] = useState(false)
@@ -17,8 +26,12 @@ export function Dashboard() {
 
   const refresh = useCallback(async () => {
     try {
-      const data = await listUserShows()
-      setShows(data)
+      const [showsData, watchedData] = await Promise.all([
+        listUserShows(),
+        listAllWatchedEpisodes(),
+      ])
+      setShows(showsData)
+      setWatchedByShow(groupWatchedByShow(watchedData))
       setError(null)
     } catch {
       setError('Could not load your shows.')
@@ -43,7 +56,7 @@ export function Dashboard() {
   }
 
   async function handleMarkWatched(id: string, season: number, episode: number) {
-    await advanceEpisode(id, season, episode)
+    await markEpisodeWatched(id, season, episode)
     await refresh()
   }
 
@@ -69,6 +82,7 @@ export function Dashboard() {
   }
   const visibleShows = shows.filter((s) => s.status === activeTab)
   const existingTmdbIds = new Set(shows.map((s) => s.tmdb_id))
+  const emptySet: Set<string> = new Set()
 
   const emptyMessage: Record<ShowStatus, string> = {
     library: "Nothing here yet — add a show you've heard about.",
@@ -103,6 +117,7 @@ export function Dashboard() {
             <ShowCard
               key={show.id}
               show={show}
+              watched={watchedByShow.get(show.id) ?? emptySet}
               onStartWatching={() => handleStartWatching(show.id)}
               onMarkWatched={(season, episode) => handleMarkWatched(show.id, season, episode)}
               onMoveToLibrary={() => handleMoveToLibrary(show.id)}
@@ -130,4 +145,14 @@ export function Dashboard() {
       )}
     </div>
   )
+}
+
+function groupWatchedByShow(rows: WatchedEpisode[]): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>()
+  for (const row of rows) {
+    const set = map.get(row.user_show_id) ?? new Set<string>()
+    set.add(episodeKey(row.season_number, row.episode_number))
+    map.set(row.user_show_id, set)
+  }
+  return map
 }

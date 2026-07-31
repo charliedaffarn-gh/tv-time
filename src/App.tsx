@@ -4,6 +4,7 @@ import { useAuth } from './contexts/useAuth'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { LoginPage } from './components/LoginPage'
 import { Dashboard } from './components/Dashboard'
+import { ShowDetailPage } from './components/ShowDetailPage'
 
 function AppRoutes() {
   const { session } = useAuth()
@@ -16,6 +17,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/show/:tmdbId"
+        element={
+          <ProtectedRoute>
+            <ShowDetailPage />
           </ProtectedRoute>
         }
       />

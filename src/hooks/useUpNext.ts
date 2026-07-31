@@ -8,16 +8,12 @@ export interface UpNext extends EpisodePointer {
 }
 
 /** undefined = still loading, null = caught up (nothing next has aired yet) */
-export function useUpNext(
-  season: number,
-  episode: number,
-  details: TmdbShowDetails | null,
-) {
+export function useUpNext(watched: ReadonlySet<string>, details: TmdbShowDetails | null) {
   const [upNext, setUpNext] = useState<UpNext | null | undefined>(undefined)
 
   useEffect(() => {
     if (!details) return
-    const next = computeNextEpisode({ season, episode }, details.seasons)
+    const next = computeNextEpisode(watched, details.seasons)
     if (!next) {
       setUpNext(null)
       return
@@ -36,7 +32,12 @@ export function useUpNext(
     return () => {
       cancelled = true
     }
-  }, [season, episode, details])
+    // `watched` is rebuilt as a new Set on every Dashboard refresh; re-running
+    // whenever `details` changes (rare, only on tmdb_id change) plus whenever
+    // this show's own watched count changes is what we actually want, so key
+    // off its size + details rather than object identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watched.size, details])
 
   return upNext
 }
