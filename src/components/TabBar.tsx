@@ -19,13 +19,14 @@ export function TabBar({ active, counts, onChange }: TabBarProps) {
         <button
           key={tab.key}
           onClick={() => onChange(tab.key)}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+          className={`flex flex-1 flex-col items-center rounded-md px-3 py-1.5 text-sm font-medium transition ${
             active === tab.key
               ? 'bg-indigo-600 text-white'
               : 'text-neutral-400 hover:text-neutral-200'
           }`}
         >
-          {tab.label} <span className="opacity-60">{counts[tab.key]}</span>
+          <span>{tab.label}</span>
+          <span className="opacity-60">{counts[tab.key]}</span>
         </button>
       ))}
     </div>
