@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { TmdbSearchResult, TmdbShowDetails, TmdbSeasonDetails } from '../types'
+import type { TmdbSearchResult, TmdbShowDetails, TmdbSeasonDetails, TmdbGenre } from '../types'
 
 async function authedFetch<T>(path: string): Promise<T> {
   const { data } = await supabase.auth.getSession()
@@ -43,4 +43,24 @@ export function getSeasonEpisodes(tmdbId: number, season: number): Promise<TmdbS
 
 export function getRecommendations(tmdbId: number): Promise<{ results: TmdbSearchResult[] }> {
   return authedFetch(`/api/tmdb/recommendations?id=${tmdbId}`)
+}
+
+export function getGenres(): Promise<{ genres: TmdbGenre[] }> {
+  return authedFetch('/api/tmdb/genres')
+}
+
+export function getTrending(): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch('/api/tmdb/trending')
+}
+
+export function getPopular(): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch('/api/tmdb/popular')
+}
+
+export function getTopRated(): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch('/api/tmdb/discover?sort_by=vote_average.desc&vote_count_gte=300')
+}
+
+export function getShowsByGenre(genreId: number): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch(`/api/tmdb/discover?with_genres=${genreId}`)
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { posterUrl, searchShows } from '../lib/tmdb'
+import { searchShows } from '../lib/tmdb'
+import { ShowQuickAddItem, type ShowQuickAddState } from './ShowQuickAddItem'
 import type { TmdbSearchResult } from '../types'
 
 interface AddShowModalProps {
@@ -14,6 +15,7 @@ export function AddShowModal({ onClose, onAdd, existingTmdbIds }: AddShowModalPr
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [addingId, setAddingId] = useState<number | null>(null)
+  const [addedIds, setAddedIds] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     const trimmed = query.trim()
@@ -37,7 +39,11 @@ export function AddShowModal({ onClose, onAdd, existingTmdbIds }: AddShowModalPr
     setError(null)
     const { error } = await onAdd(show)
     setAddingId(null)
-    if (error) setError(error)
+    if (error) {
+      setError(error)
+    } else {
+      setAddedIds((prev) => new Set(prev).add(show.id))
+    }
   }
 
   return (
@@ -68,30 +74,20 @@ export function AddShowModal({ onClose, onAdd, existingTmdbIds }: AddShowModalPr
 
         <ul className="max-h-96 space-y-1 overflow-y-auto">
           {results.map((show) => {
-            const alreadyAdded = existingTmdbIds.has(show.id)
-            const isAdding = addingId === show.id
-            const year = show.first_air_date?.slice(0, 4)
-            const poster = posterUrl(show.poster_path, 'w200')
+            const state: ShowQuickAddState =
+              existingTmdbIds.has(show.id) || addedIds.has(show.id)
+                ? 'added'
+                : addingId === show.id
+                  ? 'adding'
+                  : 'idle'
             return (
-              <li key={show.id}>
-                <button
-                  disabled={alreadyAdded || addingId !== null}
-                  onClick={() => handleAddClick(show)}
-                  className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {poster ? (
-                    <img src={poster} alt="" className="h-16 w-11 rounded object-cover" />
-                  ) : (
-                    <div className="h-16 w-11 rounded bg-neutral-800" />
-                  )}
-                  <div>
-                    <p className="font-medium text-neutral-100">{show.name}</p>
-                    <p className="text-xs text-neutral-500">{year ?? 'Unknown year'}</p>
-                    {alreadyAdded && <p className="text-xs text-indigo-400">Already added</p>}
-                    {isAdding && <p className="text-xs text-neutral-400">Adding…</p>}
-                  </div>
-                </button>
-              </li>
+              <ShowQuickAddItem
+                key={show.id}
+                show={show}
+                layout="row"
+                state={state}
+                onAdd={() => handleAddClick(show)}
+              />
             )
           })}
         </ul>

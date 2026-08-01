@@ -1,29 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
 import { useUpcomingEpisodes } from '../hooks/useUpcomingEpisodes'
+import { useEdgeFade } from '../hooks/useEdgeFade'
 import type { UserShow } from '../types'
 
 export function UpcomingStrip({ shows }: { shows: UserShow[] }) {
   const upcoming = useUpcomingEpisodes(shows)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const [showFade, setShowFade] = useState(false)
-
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-
-    function updateFade() {
-      if (!el) return
-      setShowFade(el.scrollWidth - el.clientWidth - el.scrollLeft > 4)
-    }
-
-    updateFade()
-    el.addEventListener('scroll', updateFade)
-    window.addEventListener('resize', updateFade)
-    return () => {
-      el.removeEventListener('scroll', updateFade)
-      window.removeEventListener('resize', updateFade)
-    }
-  }, [upcoming])
+  const { scrollRef, showFade } = useEdgeFade(upcoming)
 
   if (upcoming.length === 0) return null
 

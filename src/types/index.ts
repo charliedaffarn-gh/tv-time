@@ -95,3 +95,8 @@ export interface TmdbSeasonDetails {
   season_number: number
   episodes: TmdbEpisodeRef[]
 }
+
+export interface TmdbGenre {
+  id: number
+  name: string
+}
