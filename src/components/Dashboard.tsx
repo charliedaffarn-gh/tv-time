@@ -23,57 +23,63 @@ export function Dashboard() {
   const [activeTab, setActiveTab] = useState<ShowStatus>('watching')
   const [showAddModal, setShowAddModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [watchedError, setWatchedError] = useState(false)
 
   const refresh = useCallback(async () => {
+    // Fetched independently on purpose: a failure loading watched-episode
+    // progress (e.g. before the episode-ledger migration has been run)
+    // must not blank out the shows list itself.
     try {
-      const [showsData, watchedData] = await Promise.all([
-        listUserShows(),
-        listAllWatchedEpisodes(),
-      ])
+      const showsData = await listUserShows()
       setShows(showsData)
-      setWatchedByShow(groupWatchedByShow(watchedData))
       setError(null)
     } catch {
       setError('Could not load your shows.')
-    } finally {
       setLoading(false)
+      return
     }
+
+    try {
+      const watchedData = await listAllWatchedEpisodes()
+      setWatchedByShow(groupWatchedByShow(watchedData))
+      setWatchedError(false)
+    } catch {
+      setWatchedError(true)
+    }
+
+    setLoading(false)
   }, [])
 
   useEffect(() => {
     refresh()
   }, [refresh])
 
-  async function handleAdd(result: TmdbSearchResult) {
-    setShowAddModal(false)
-    await addShow({ tmdb_id: result.id, title: result.name, poster_path: result.poster_path })
-    await refresh()
+  async function runAction(action: () => Promise<void>) {
+    try {
+      await action()
+      await refresh()
+    } catch {
+      setError('That action failed. Please try again.')
+    }
   }
 
-  async function handleStartWatching(id: string) {
-    await setStatus(id, 'watching')
-    await refresh()
+  async function handleAdd(result: TmdbSearchResult): Promise<{ error: string | null }> {
+    try {
+      await addShow({ tmdb_id: result.id, title: result.name, poster_path: result.poster_path })
+      setShowAddModal(false)
+      await refresh()
+      return { error: null }
+    } catch {
+      return { error: 'Could not add that show. Try again.' }
+    }
   }
 
-  async function handleMarkWatched(id: string, season: number, episode: number) {
-    await markEpisodeWatched(id, season, episode)
-    await refresh()
-  }
-
-  async function handleMoveToLibrary(id: string) {
-    await setStatus(id, 'library')
-    await refresh()
-  }
-
-  async function handleMoveToFinished(id: string) {
-    await setStatus(id, 'finished')
-    await refresh()
-  }
-
-  async function handleRemove(id: string) {
-    await removeShow(id)
-    await refresh()
-  }
+  const handleStartWatching = (id: string) => runAction(() => setStatus(id, 'watching'))
+  const handleMarkWatched = (id: string, season: number, episode: number) =>
+    runAction(() => markEpisodeWatched(id, season, episode))
+  const handleMoveToLibrary = (id: string) => runAction(() => setStatus(id, 'library'))
+  const handleMoveToFinished = (id: string) => runAction(() => setStatus(id, 'finished'))
+  const handleRemove = (id: string) => runAction(() => removeShow(id))
 
   const counts: Record<ShowStatus, number> = {
     library: shows.filter((s) => s.status === 'library').length,
@@ -106,6 +112,12 @@ export function Dashboard() {
       </div>
 
       {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
+      {watchedError && (
+        <p className="mb-4 text-sm text-amber-400">
+          Couldn't load episode progress — "Up next" may be inaccurate until this loads. Try
+          refreshing the page.
+        </p>
+      )}
 
       {loading ? (
         <p className="text-neutral-500">Loading…</p>

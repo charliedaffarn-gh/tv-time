@@ -4,7 +4,7 @@ import type { TmdbSearchResult } from '../types'
 
 interface AddShowModalProps {
   onClose: () => void
-  onAdd: (show: TmdbSearchResult) => void
+  onAdd: (show: TmdbSearchResult) => Promise<{ error: string | null }>
   existingTmdbIds: Set<number>
 }
 
@@ -13,6 +13,7 @@ export function AddShowModal({ onClose, onAdd, existingTmdbIds }: AddShowModalPr
   const [results, setResults] = useState<TmdbSearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [addingId, setAddingId] = useState<number | null>(null)
 
   useEffect(() => {
     const trimmed = query.trim()
@@ -30,6 +31,14 @@ export function AddShowModal({ onClose, onAdd, existingTmdbIds }: AddShowModalPr
     }, 300)
     return () => clearTimeout(handle)
   }, [query])
+
+  async function handleAddClick(show: TmdbSearchResult) {
+    setAddingId(show.id)
+    setError(null)
+    const { error } = await onAdd(show)
+    setAddingId(null)
+    if (error) setError(error)
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 px-4 pt-16">
@@ -60,13 +69,14 @@ export function AddShowModal({ onClose, onAdd, existingTmdbIds }: AddShowModalPr
         <ul className="max-h-96 space-y-1 overflow-y-auto">
           {results.map((show) => {
             const alreadyAdded = existingTmdbIds.has(show.id)
+            const isAdding = addingId === show.id
             const year = show.first_air_date?.slice(0, 4)
             const poster = posterUrl(show.poster_path, 'w200')
             return (
               <li key={show.id}>
                 <button
-                  disabled={alreadyAdded}
-                  onClick={() => onAdd(show)}
+                  disabled={alreadyAdded || addingId !== null}
+                  onClick={() => handleAddClick(show)}
                   className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {poster ? (
@@ -78,6 +88,7 @@ export function AddShowModal({ onClose, onAdd, existingTmdbIds }: AddShowModalPr
                     <p className="font-medium text-neutral-100">{show.name}</p>
                     <p className="text-xs text-neutral-500">{year ?? 'Unknown year'}</p>
                     {alreadyAdded && <p className="text-xs text-indigo-400">Already added</p>}
+                    {isAdding && <p className="text-xs text-neutral-400">Adding…</p>}
                   </div>
                 </button>
               </li>
