@@ -71,7 +71,7 @@ export function ShowCard({
                 onClick={onMoveToFinished}
                 className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-300 hover:bg-neutral-700"
               >
-                Move to finished
+                Remove from Watching
               </button>
             </div>
           </div>

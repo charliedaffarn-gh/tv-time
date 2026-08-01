@@ -200,7 +200,7 @@ export function ShowDetailPage() {
             onClick={() => handleStatusChange('finished')}
             className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
           >
-            Mark finished
+            {userShow.status === 'watching' ? 'Remove from Watching' : 'Mark finished'}
           </button>
         )}
         {userShow.status !== 'library' && (
