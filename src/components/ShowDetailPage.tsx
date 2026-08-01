@@ -30,6 +30,8 @@ export function ShowDetailPage() {
   const [seasonLoading, setSeasonLoading] = useState<number | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [showRecommendationsModal, setShowRecommendationsModal] = useState(false)
+  const [adding, setAdding] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
 
   const { details } = useShowDetails(numericTmdbId)
 
@@ -143,19 +145,26 @@ export function ShowDetailPage() {
     }
   }
 
-  if (userShow === undefined || !details) {
-    return <div className="p-8 text-center text-neutral-500">Loading…</div>
+  async function handleAddToLibrary() {
+    if (!details) return
+    setAdding(true)
+    setAddError(null)
+    try {
+      const newShow = await addShow({
+        tmdb_id: numericTmdbId,
+        title: details.name,
+        poster_path: details.poster_path,
+      })
+      setUserShow(newShow)
+    } catch {
+      setAddError('Could not add that show. Try again.')
+    } finally {
+      setAdding(false)
+    }
   }
 
-  if (userShow === null) {
-    return (
-      <div className="p-8 text-center text-neutral-500">
-        You haven't added this show yet.{' '}
-        <Link to="/" className="text-indigo-400 hover:underline">
-          Back to your library
-        </Link>
-      </div>
-    )
+  if (userShow === undefined || !details) {
+    return <div className="p-8 text-center text-neutral-500">Loading…</div>
   }
 
   const backdrop = posterUrl(details.backdrop_path, 'w500')
@@ -227,84 +236,99 @@ export function ShowDetailPage() {
         </div>
       )}
 
-      <div className="mt-4 flex flex-wrap gap-2 text-sm">
-        {userShow.status !== 'watching' && (
+      {userShow === null ? (
+        <div className="mt-4">
+          {addError && <p className="mb-2 text-sm text-red-400">{addError}</p>}
           <button
-            onClick={() => handleStatusChange('watching')}
-            className="rounded-md bg-indigo-600 px-3 py-1.5 font-medium text-white hover:bg-indigo-500"
+            onClick={handleAddToLibrary}
+            disabled={adding}
+            className="rounded-md bg-indigo-600 px-3 py-1.5 font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
           >
-            {userShow.status === 'finished' ? 'Watch again' : 'Start watching'}
+            {adding ? 'Adding…' : 'Add to Library'}
           </button>
-        )}
-        {userShow.status === 'library' && (
-          <button
-            onClick={() => handleStatusChange('finished')}
-            className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
-          >
-            Mark finished
-          </button>
-        )}
-        {userShow.status !== 'library' && (
-          <button
-            onClick={() => handleStatusChange('library')}
-            className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
-          >
-            {userShow.status === 'watching' ? 'Stop watching' : 'Back to library'}
-          </button>
-        )}
-        <button
-          onClick={() => setShowShareModal(true)}
-          className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
-        >
-          Share
-        </button>
-        <button
-          onClick={() => setShowRecommendationsModal(true)}
-          className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
-        >
-          Similar shows
-        </button>
-        <button
-          onClick={handleRemove}
-          className="rounded-md bg-neutral-800 px-3 py-1.5 text-red-400 hover:bg-neutral-700"
-        >
-          Remove
-        </button>
-      </div>
+        </div>
+      ) : (
+        <>
+          <div className="mt-4 flex flex-wrap gap-2 text-sm">
+            {userShow.status !== 'watching' && (
+              <button
+                onClick={() => handleStatusChange('watching')}
+                className="rounded-md bg-indigo-600 px-3 py-1.5 font-medium text-white hover:bg-indigo-500"
+              >
+                {userShow.status === 'finished' ? 'Watch again' : 'Start watching'}
+              </button>
+            )}
+            {userShow.status === 'library' && (
+              <button
+                onClick={() => handleStatusChange('finished')}
+                className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
+              >
+                Mark finished
+              </button>
+            )}
+            {userShow.status !== 'library' && (
+              <button
+                onClick={() => handleStatusChange('library')}
+                className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
+              >
+                {userShow.status === 'watching' ? 'Stop watching' : 'Back to library'}
+              </button>
+            )}
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
+            >
+              Share
+            </button>
+            <button
+              onClick={() => setShowRecommendationsModal(true)}
+              className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
+            >
+              Similar shows
+            </button>
+            <button
+              onClick={handleRemove}
+              className="rounded-md bg-neutral-800 px-3 py-1.5 text-red-400 hover:bg-neutral-700"
+            >
+              Remove
+            </button>
+          </div>
 
-      {showShareModal && (
-        <ShareModal
-          onClose={() => setShowShareModal(false)}
-          show={{ tmdb_id: userShow.tmdb_id, title: userShow.title, poster_path: userShow.poster_path }}
-        />
+          {showShareModal && (
+            <ShareModal
+              onClose={() => setShowShareModal(false)}
+              show={{ tmdb_id: userShow.tmdb_id, title: userShow.title, poster_path: userShow.poster_path }}
+            />
+          )}
+
+          {showRecommendationsModal && (
+            <RecommendationsModal
+              onClose={() => setShowRecommendationsModal(false)}
+              tmdbId={userShow.tmdb_id}
+              title={userShow.title}
+              onAdd={handleAddRecommendation}
+            />
+          )}
+
+          <div className="mt-6 space-y-2">
+            {realSeasons.map((season) => (
+              <SeasonRow
+                key={season.season_number}
+                seasonNumber={season.season_number}
+                name={season.name}
+                episodeCount={season.episode_count}
+                watched={watched}
+                expanded={expandedSeason === season.season_number}
+                loading={seasonLoading === season.season_number}
+                episodes={seasonEpisodes.get(season.season_number)}
+                onToggleSeason={() => toggleSeason(season.season_number)}
+                onToggleEpisode={toggleEpisode}
+                onMarkAllWatched={handleMarkSeasonWatched}
+              />
+            ))}
+          </div>
+        </>
       )}
-
-      {showRecommendationsModal && (
-        <RecommendationsModal
-          onClose={() => setShowRecommendationsModal(false)}
-          tmdbId={userShow.tmdb_id}
-          title={userShow.title}
-          onAdd={handleAddRecommendation}
-        />
-      )}
-
-      <div className="mt-6 space-y-2">
-        {realSeasons.map((season) => (
-          <SeasonRow
-            key={season.season_number}
-            seasonNumber={season.season_number}
-            name={season.name}
-            episodeCount={season.episode_count}
-            watched={watched}
-            expanded={expandedSeason === season.season_number}
-            loading={seasonLoading === season.season_number}
-            episodes={seasonEpisodes.get(season.season_number)}
-            onToggleSeason={() => toggleSeason(season.season_number)}
-            onToggleEpisode={toggleEpisode}
-            onMarkAllWatched={handleMarkSeasonWatched}
-          />
-        ))}
-      </div>
     </div>
   )
 }

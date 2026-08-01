@@ -47,6 +47,7 @@ const SECTIONS: Section[] = [
       '"Coming up" on the Watching tab shows upcoming air dates at a glance.',
       '"Where to watch" links out to streaming services carrying the show, when available.',
       '"Similar shows" suggests other shows like it, with a one-tap add straight to your Library.',
+      "Tapping into a show you haven't added yet shows the same details, with an Add to Library button.",
     ],
   },
   {
