@@ -10,6 +10,7 @@ import {
 } from '../lib/shows'
 import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
 import { fetchShowDetailsCached } from '../lib/tmdbCache'
+import { isShowConcluded } from '../lib/tmdb'
 import { useAuth } from '../contexts/useAuth'
 import { AddShowModal } from './AddShowModal'
 import { ShowCard } from './ShowCard'
@@ -90,7 +91,7 @@ export function Dashboard() {
       ])
       const freshWatched = new Set(rows.map((r) => episodeKey(r.season_number, r.episode_number)))
       const caughtUp = computeNextEpisode(freshWatched, tmdbDetails.seasons) === null
-      if (caughtUp) {
+      if (caughtUp && isShowConcluded(tmdbDetails.status)) {
         await setStatus(id, 'finished')
       }
     })

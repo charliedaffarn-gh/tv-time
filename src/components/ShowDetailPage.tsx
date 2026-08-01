@@ -12,7 +12,7 @@ import {
 import { useShowDetails } from '../hooks/useShowDetails'
 import { fetchSeasonEpisodesCached } from '../lib/tmdbCache'
 import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
-import { posterUrl } from '../lib/tmdb'
+import { isShowConcluded, posterUrl } from '../lib/tmdb'
 import type { ShowStatus, TmdbEpisodeRef, UserShow } from '../types'
 
 export function ShowDetailPage() {
@@ -57,7 +57,9 @@ export function ShowDetailPage() {
   /**
    * Runs a "mark watched" mutation, then updates status to match: starts the
    * show watching if it was still sitting in the library, or moves it to
-   * Finished if that was the last unwatched episode.
+   * Finished once caught up -- but only once the show itself has actually
+   * concluded. An ongoing show that you've caught up with just stays in
+   * Watching until it airs something new.
    */
   async function markWatchedAndUpdateStatus(mutate: () => Promise<void>) {
     if (!userShow || !details) return
@@ -65,7 +67,8 @@ export function ShowDetailPage() {
     const freshWatched = await refreshWatched(userShow.id)
 
     const caughtUp = computeNextEpisode(freshWatched, details.seasons) === null
-    const nextStatus: ShowStatus | null = caughtUp
+    const shouldFinish = caughtUp && isShowConcluded(details.status)
+    const nextStatus: ShowStatus | null = shouldFinish
       ? 'finished'
       : userShow.status === 'library'
         ? 'watching'

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
-import { posterUrl } from '../lib/tmdb'
+import { isShowConcluded, posterUrl } from '../lib/tmdb'
 import { useShowDetails } from '../hooks/useShowDetails'
 import { useUpNext } from '../hooks/useUpNext'
-import type { UserShow } from '../types'
+import type { TmdbShowDetails, UserShow } from '../types'
 
 interface ShowCardProps {
   show: UserShow
@@ -51,7 +51,7 @@ export function ShowCard({
           <div className="flex flex-1 flex-col justify-between gap-2">
             <p className="text-xs text-neutral-400">
               {upNext === undefined && 'Loading…'}
-              {upNext === null && 'All caught up'}
+              {upNext === null && details && caughtUpMessage(details)}
               {upNext && (
                 <>
                   Up next: S{upNext.season}E{upNext.episode}
@@ -105,4 +105,17 @@ export function ShowCard({
       </div>
     </div>
   )
+}
+
+function caughtUpMessage(details: TmdbShowDetails): string {
+  if (isShowConcluded(details.status)) return 'All caught up'
+  const nextAirDate = details.next_episode_to_air?.air_date
+  if (nextAirDate) {
+    const date = new Date(nextAirDate).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    })
+    return `Caught up — next episode ${date}`
+  }
+  return 'Caught up — more coming'
 }

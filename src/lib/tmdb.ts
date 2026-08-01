@@ -18,6 +18,13 @@ export function posterUrl(path: string | null, size: 'w200' | 'w342' | 'w500' = 
   return `https://image.tmdb.org/t/p/${size}${path}`
 }
 
+const CONCLUDED_STATUSES = new Set(['Ended', 'Canceled'])
+
+/** True once TMDB says the show itself is done -- no more episodes are ever coming. */
+export function isShowConcluded(status: string): boolean {
+  return CONCLUDED_STATUSES.has(status)
+}
+
 export function searchShows(query: string): Promise<{ results: TmdbSearchResult[] }> {
   return authedFetch(`/api/tmdb/search?query=${encodeURIComponent(query)}`)
 }
