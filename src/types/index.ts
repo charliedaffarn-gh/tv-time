@@ -60,6 +60,18 @@ export interface TmdbEpisodeRef {
   still_path: string | null
 }
 
+export interface TmdbWatchProvider {
+  provider_name: string
+  logo_path: string | null
+}
+
+export interface TmdbWatchProviderRegion {
+  link: string
+  flatrate?: TmdbWatchProvider[]
+  rent?: TmdbWatchProvider[]
+  buy?: TmdbWatchProvider[]
+}
+
 export interface TmdbShowDetails {
   id: number
   name: string
@@ -76,6 +88,7 @@ export interface TmdbShowDetails {
   next_episode_to_air: TmdbEpisodeRef | null
   last_episode_to_air: TmdbEpisodeRef | null
   external_ids?: { imdb_id: string | null }
+  'watch/providers'?: { results: Record<string, TmdbWatchProviderRegion> }
 }
 
 export interface TmdbSeasonDetails {

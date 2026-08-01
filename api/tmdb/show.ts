@@ -21,7 +21,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { status, body } = await tmdbFetch(`/tv/${id}`, { append_to_response: 'external_ids' })
+    const { status, body } = await tmdbFetch(`/tv/${id}`, {
+      append_to_response: 'external_ids,watch/providers',
+    })
     res.setHeader('Cache-Control', 'private, max-age=3600')
     res.status(status).json(body)
   } catch {

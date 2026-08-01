@@ -12,7 +12,7 @@ import {
 import { useShowDetails } from '../hooks/useShowDetails'
 import { fetchSeasonEpisodesCached } from '../lib/tmdbCache'
 import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
-import { isShowConcluded, posterUrl } from '../lib/tmdb'
+import { isShowConcluded, posterUrl, WATCH_REGION } from '../lib/tmdb'
 import { ShareModal } from './ShareModal'
 import type { ShowStatus, TmdbEpisodeRef, UserShow } from '../types'
 
@@ -151,6 +151,7 @@ export function ShowDetailPage() {
     .filter((s) => s.season_number >= 1 && s.episode_count > 0)
     .sort((a, b) => a.season_number - b.season_number)
   const imdbId = details.external_ids?.imdb_id
+  const watchProviders = details['watch/providers']?.results?.[WATCH_REGION]
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
@@ -187,6 +188,32 @@ export function ShowDetailPage() {
       </div>
 
       {details.overview && <p className="mt-3 text-sm text-neutral-300">{details.overview}</p>}
+
+      {watchProviders && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {(watchProviders.flatrate ?? []).map((provider) => {
+            const logo = posterUrl(provider.logo_path, 'w92')
+            return logo ? (
+              <img
+                key={provider.provider_name}
+                src={logo}
+                alt={provider.provider_name}
+                title={provider.provider_name}
+                className="h-8 w-8 rounded-md"
+              />
+            ) : null
+          })}
+          <a
+            href={watchProviders.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-indigo-400 hover:underline"
+          >
+            Where to watch ↗
+          </a>
+          <span className="text-xs text-neutral-600">(streaming data via JustWatch)</span>
+        </div>
+      )}
 
       <div className="mt-4 flex flex-wrap gap-2 text-sm">
         {userShow.status !== 'watching' && (
