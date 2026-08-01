@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+:root {
+  /* Nominal bottom-nav content height (excludes safe-area-inset-bottom),
+     referenced by AppLayout's content padding and Dashboard's FAB offset
+     so they can't drift apart from BottomNav's actual size. */
+  --bottom-nav-h: 4.5rem;
+}
+
 html,
 body,
 #root {

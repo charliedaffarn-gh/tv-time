@@ -3,7 +3,9 @@ import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './contexts/useAuth'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { LoginPage } from './components/LoginPage'
+import { AppLayout } from './components/AppLayout'
 import { Dashboard } from './components/Dashboard'
+import { DiscoverPage } from './components/DiscoverPage'
 import { ShowDetailPage } from './components/ShowDetailPage'
 
 function AppRoutes() {
@@ -13,13 +15,15 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={session ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route
-        path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <AppLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/discover" element={<DiscoverPage />} />
+      </Route>
       <Route
         path="/show/:tmdbId"
         element={

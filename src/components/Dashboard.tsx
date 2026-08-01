@@ -12,9 +12,7 @@ import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
 import { fetchShowDetailsCached } from '../lib/tmdbCache'
 import { isShowConcluded } from '../lib/tmdb'
 import { acceptShare, dismissShare, listPendingShares } from '../lib/shares'
-import { useAuth } from '../contexts/useAuth'
 import { AddShowModal } from './AddShowModal'
-import { HelpModal } from './HelpModal'
 import { PendingShares } from './PendingShares'
 import { ShowCard, type ShowCardView } from './ShowCard'
 import { TabBar } from './TabBar'
@@ -24,7 +22,6 @@ import type { ShowShare, ShowStatus, TmdbSearchResult, UserShow, WatchedEpisode 
 const VIEW_STORAGE_KEY = 'show-view-mode'
 
 export function Dashboard() {
-  const { signOut } = useAuth()
   const [shows, setShows] = useState<UserShow[]>([])
   const [watchedByShow, setWatchedByShow] = useState<Map<string, Set<string>>>(new Map())
   const [watchingOrder, setWatchingOrder] = useState<Map<string, WatchingSortInfo>>(new Map())
@@ -32,7 +29,6 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<ShowStatus>('watching')
   const [showAddModal, setShowAddModal] = useState(false)
-  const [showHelpModal, setShowHelpModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [watchedError, setWatchedError] = useState(false)
   const [view, setView] = useState<ShowCardView>(
@@ -183,24 +179,7 @@ export function Dashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="min-w-0 truncate text-base font-semibold text-neutral-100">
-          What Am I Watching
-        </h1>
-        <div className="flex shrink-0 items-center gap-4">
-          <button
-            onClick={() => setShowHelpModal(true)}
-            className="text-sm text-neutral-500 hover:text-neutral-300"
-          >
-            Help
-          </button>
-          <button onClick={signOut} className="text-sm text-neutral-500 hover:text-neutral-300">
-            Sign out
-          </button>
-        </div>
-      </div>
-
+    <>
       <PendingShares
         shares={pendingShares}
         onAccept={handleAcceptShare}
@@ -274,7 +253,8 @@ export function Dashboard() {
 
       <button
         onClick={() => setShowAddModal(true)}
-        className="fixed right-6 bottom-6 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-2xl text-white shadow-lg hover:bg-indigo-500"
+        style={{ bottom: 'calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 1rem)' }}
+        className="fixed right-6 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-2xl text-white shadow-lg hover:bg-indigo-500"
         aria-label="Add a show"
       >
         +
@@ -287,9 +267,7 @@ export function Dashboard() {
           existingTmdbIds={existingTmdbIds}
         />
       )}
-
-      {showHelpModal && <HelpModal onClose={() => setShowHelpModal(false)} />}
-    </div>
+    </>
   )
 }
 
