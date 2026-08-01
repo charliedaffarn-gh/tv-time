@@ -37,6 +37,7 @@ const SECTIONS: Section[] = [
     items: [
       "Tap a poster or title for a show's synopsis, rating, genres, network, and a direct link to IMDb.",
       '"Coming up" on the Watching tab shows upcoming air dates at a glance.',
+      '"Where to watch" links out to streaming services carrying the show, when available.',
     ],
   },
   {
@@ -49,6 +50,12 @@ const SECTIONS: Section[] = [
   {
     heading: 'On your phone',
     items: ['Add it to your home screen from your browser menu — it opens full-screen, like a normal app.'],
+  },
+  {
+    heading: 'Grid or list',
+    items: [
+      'Switch any tab between poster grid and a compact list using the toggle next to the tabs — whichever you pick is remembered next time.',
+    ],
   },
 ]
 
