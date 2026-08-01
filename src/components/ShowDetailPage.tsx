@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   getUserShowByTmdbId,
   listWatchedEpisodesForShow,
   markEpisodeUnwatched,
   markEpisodeWatched,
+  markSeasonWatched,
+  removeShow,
   setStatus,
 } from '../lib/shows'
 import { useShowDetails } from '../hooks/useShowDetails'
@@ -16,6 +18,7 @@ import type { ShowStatus, TmdbEpisodeRef, UserShow } from '../types'
 export function ShowDetailPage() {
   const { tmdbId } = useParams<{ tmdbId: string }>()
   const numericTmdbId = Number(tmdbId)
+  const navigate = useNavigate()
 
   const [userShow, setUserShow] = useState<UserShow | null | undefined>(undefined)
   const [watched, setWatched] = useState<Set<string>>(new Set())
@@ -44,6 +47,22 @@ export function ShowDetailPage() {
     }
   }, [numericTmdbId])
 
+  async function refreshWatched(userShowId: string) {
+    const rows = await listWatchedEpisodesForShow(userShowId)
+    setWatched(new Set(rows.map((r) => episodeKey(r.season_number, r.episode_number))))
+  }
+
+  /** Runs a "mark watched" mutation, then starts the show watching if it was still sitting in the library. */
+  async function markWatchedAndMaybeStartWatching(mutate: () => Promise<void>) {
+    if (!userShow) return
+    await mutate()
+    await refreshWatched(userShow.id)
+    if (userShow.status === 'library') {
+      await setStatus(userShow.id, 'watching')
+      setUserShow((prev) => (prev ? { ...prev, status: 'watching' } : prev))
+    }
+  }
+
   async function toggleSeason(seasonNumber: number) {
     if (expandedSeason === seasonNumber) {
       setExpandedSeason(null)
@@ -66,17 +85,31 @@ export function ShowDetailPage() {
     const key = episodeKey(seasonNumber, episodeNumber)
     if (watched.has(key)) {
       await markEpisodeUnwatched(userShow.id, seasonNumber, episodeNumber)
+      await refreshWatched(userShow.id)
     } else {
-      await markEpisodeWatched(userShow.id, seasonNumber, episodeNumber)
+      await markWatchedAndMaybeStartWatching(() =>
+        markEpisodeWatched(userShow.id, seasonNumber, episodeNumber),
+      )
     }
-    const rows = await listWatchedEpisodesForShow(userShow.id)
-    setWatched(new Set(rows.map((r) => episodeKey(r.season_number, r.episode_number))))
+  }
+
+  async function handleMarkSeasonWatched(seasonNumber: number, episodeCount: number) {
+    if (!userShow) return
+    await markWatchedAndMaybeStartWatching(() =>
+      markSeasonWatched(userShow.id, seasonNumber, episodeCount),
+    )
   }
 
   async function handleStatusChange(status: ShowStatus) {
     if (!userShow) return
     await setStatus(userShow.id, status)
     setUserShow({ ...userShow, status })
+  }
+
+  async function handleRemove() {
+    if (!userShow) return
+    await removeShow(userShow.id)
+    navigate('/')
   }
 
   if (userShow === undefined || !details) {
@@ -98,6 +131,7 @@ export function ShowDetailPage() {
   const realSeasons = details.seasons
     .filter((s) => s.season_number >= 1 && s.episode_count > 0)
     .sort((a, b) => a.season_number - b.season_number)
+  const imdbId = details.external_ids?.imdb_id
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
@@ -108,7 +142,31 @@ export function ShowDetailPage() {
       {backdrop && <img src={backdrop} alt="" className="mb-4 w-full rounded-xl object-cover" />}
 
       <h1 className="text-2xl font-semibold text-neutral-100">{details.name}</h1>
-      <p className="mt-1 text-sm text-neutral-500">{details.status}</p>
+
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-neutral-400">
+        <span>{details.status}</span>
+        {details.vote_average > 0 && (
+          <span>
+            ★ {details.vote_average.toFixed(1)}{' '}
+            <span className="text-neutral-500">({details.vote_count.toLocaleString()} votes)</span>
+          </span>
+        )}
+        {details.genres.length > 0 && <span>{details.genres.map((g) => g.name).join(', ')}</span>}
+        {details.networks.length > 0 && (
+          <span>{details.networks.map((n) => n.name).join(', ')}</span>
+        )}
+        {imdbId && (
+          <a
+            href={`https://www.imdb.com/title/${imdbId}/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-400 hover:underline"
+          >
+            View on IMDb ↗
+          </a>
+        )}
+      </div>
+
       {details.overview && <p className="mt-3 text-sm text-neutral-300">{details.overview}</p>}
 
       <div className="mt-4 flex flex-wrap gap-2 text-sm">
@@ -136,6 +194,12 @@ export function ShowDetailPage() {
             Back to library
           </button>
         )}
+        <button
+          onClick={handleRemove}
+          className="rounded-md bg-neutral-800 px-3 py-1.5 text-red-400 hover:bg-neutral-700"
+        >
+          Remove
+        </button>
       </div>
 
       <div className="mt-6 space-y-2">
@@ -151,6 +215,7 @@ export function ShowDetailPage() {
             episodes={seasonEpisodes.get(season.season_number)}
             onToggleSeason={() => toggleSeason(season.season_number)}
             onToggleEpisode={toggleEpisode}
+            onMarkAllWatched={handleMarkSeasonWatched}
           />
         ))}
       </div>
@@ -168,6 +233,7 @@ interface SeasonRowProps {
   episodes: TmdbEpisodeRef[] | undefined
   onToggleSeason: () => void
   onToggleEpisode: (season: number, episode: number) => void
+  onMarkAllWatched: (season: number, episodeCount: number) => void
 }
 
 function SeasonRow({
@@ -180,6 +246,7 @@ function SeasonRow({
   episodes,
   onToggleSeason,
   onToggleEpisode,
+  onMarkAllWatched,
 }: SeasonRowProps) {
   let watchedCount = 0
   for (let e = 1; e <= episodeCount; e++) {
@@ -188,15 +255,24 @@ function SeasonRow({
 
   return (
     <div className="rounded-lg bg-neutral-900">
-      <button
-        onClick={onToggleSeason}
-        className="flex w-full items-center justify-between px-4 py-3 text-left"
-      >
-        <span className="font-medium text-neutral-100">{name}</span>
-        <span className="text-xs text-neutral-500">
-          {watchedCount}/{episodeCount} watched
-        </span>
-      </button>
+      <div className="flex items-center justify-between px-4 py-3">
+        <button onClick={onToggleSeason} className="flex-1 text-left font-medium text-neutral-100">
+          {name}
+        </button>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-neutral-500">
+            {watchedCount}/{episodeCount} watched
+          </span>
+          {watchedCount < episodeCount && (
+            <button
+              onClick={() => onMarkAllWatched(seasonNumber, episodeCount)}
+              className="text-xs font-medium text-indigo-400 hover:underline"
+            >
+              Mark all watched
+            </button>
+          )}
+        </div>
+      </div>
 
       {expanded && (
         <div className="space-y-1 px-2 pb-2">

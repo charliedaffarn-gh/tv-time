@@ -48,10 +48,15 @@ export interface TmdbShowDetails {
   poster_path: string | null
   backdrop_path: string | null
   status: string
+  vote_average: number
+  vote_count: number
+  genres: { id: number; name: string }[]
+  networks: { id: number; name: string; logo_path: string | null }[]
   number_of_seasons: number
   seasons: TmdbSeasonSummary[]
   next_episode_to_air: TmdbEpisodeRef | null
   last_episode_to_air: TmdbEpisodeRef | null
+  external_ids?: { imdb_id: string | null }
 }
 
 export interface TmdbSeasonDetails {

@@ -85,6 +85,22 @@ export async function markEpisodeWatched(
   if (error) throw error
 }
 
+export async function markSeasonWatched(
+  userShowId: string,
+  season: number,
+  episodeCount: number,
+): Promise<void> {
+  const rows = Array.from({ length: episodeCount }, (_, i) => ({
+    user_show_id: userShowId,
+    season_number: season,
+    episode_number: i + 1,
+  }))
+  const { error } = await supabase
+    .from('watched_episodes')
+    .upsert(rows, { onConflict: 'user_show_id,season_number,episode_number', ignoreDuplicates: true })
+  if (error) throw error
+}
+
 export async function markEpisodeUnwatched(
   userShowId: string,
   season: number,
