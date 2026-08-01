@@ -22,6 +22,7 @@ export function Dashboard() {
   const { signOut } = useAuth()
   const [shows, setShows] = useState<UserShow[]>([])
   const [watchedByShow, setWatchedByShow] = useState<Map<string, Set<string>>>(new Map())
+  const [watchingOrder, setWatchingOrder] = useState<Map<string, WatchingSortInfo>>(new Map())
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<ShowStatus>('watching')
   const [showAddModal, setShowAddModal] = useState(false)
@@ -56,6 +57,38 @@ export function Dashboard() {
   useEffect(() => {
     refresh()
   }, [refresh])
+
+  // Ranks Watching shows so ones with something to actually watch sort above
+  // ones you're just caught up with, and among those, soonest air date first.
+  useEffect(() => {
+    const watchingShows = shows.filter((s) => s.status === 'watching')
+    if (watchingShows.length === 0) {
+      setWatchingOrder(new Map())
+      return
+    }
+    let cancelled = false
+    Promise.all(
+      watchingShows.map(async (show) => {
+        const watched = watchedByShow.get(show.id) ?? new Set<string>()
+        try {
+          const details = await fetchShowDetailsCached(show.tmdb_id)
+          const hasNext = computeNextEpisode(watched, details.seasons) !== null
+          const nextAirDate = details.next_episode_to_air?.air_date ?? null
+          const rank: WatchingSortInfo = hasNext
+            ? { tier: 0, nextAirDate: null }
+            : { tier: nextAirDate ? 1 : 2, nextAirDate }
+          return [show.id, rank] as const
+        } catch {
+          return [show.id, { tier: 0, nextAirDate: null } as WatchingSortInfo] as const
+        }
+      }),
+    ).then((entries) => {
+      if (!cancelled) setWatchingOrder(new Map(entries))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [shows, watchedByShow])
 
   async function runAction(action: () => Promise<void>) {
     try {
@@ -105,6 +138,16 @@ export function Dashboard() {
     finished: shows.filter((s) => s.status === 'finished').length,
   }
   const visibleShows = shows.filter((s) => s.status === activeTab)
+  if (activeTab === 'watching') {
+    visibleShows.sort((a, b) => {
+      const rankA = watchingOrder.get(a.id)
+      const rankB = watchingOrder.get(b.id)
+      if (!rankA || !rankB) return 0
+      if (rankA.tier !== rankB.tier) return rankA.tier - rankB.tier
+      if (rankA.tier === 1) return (rankA.nextAirDate ?? '').localeCompare(rankB.nextAirDate ?? '')
+      return 0
+    })
+  }
   const existingTmdbIds = new Set(shows.map((s) => s.tmdb_id))
   const emptySet: Set<string> = new Set()
 
@@ -174,6 +217,12 @@ export function Dashboard() {
       )}
     </div>
   )
+}
+
+interface WatchingSortInfo {
+  /** 0 = has an unwatched episode, 1 = caught up with a known next air date, 2 = caught up, no date yet */
+  tier: 0 | 1 | 2
+  nextAirDate: string | null
 }
 
 function groupWatchedByShow(rows: WatchedEpisode[]): Map<string, Set<string>> {
