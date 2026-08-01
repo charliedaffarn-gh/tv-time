@@ -65,10 +65,10 @@ export function ShowCard({
                 onClick={() => upNext && onMarkWatched(upNext.season, upNext.episode)}
                 className="rounded-md bg-indigo-600 px-2 py-1 font-medium text-white hover:bg-indigo-500 disabled:opacity-40"
               >
-                Mark watched
+                Mark episode watched
               </button>
               <button onClick={onMoveToFinished} className="text-neutral-400 hover:text-neutral-200">
-                Finished
+                Move to finished
               </button>
               <button onClick={onMoveToLibrary} className="text-neutral-400 hover:text-neutral-200">
                 Back to library
