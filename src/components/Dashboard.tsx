@@ -186,7 +186,7 @@ export function Dashboard() {
     <div className="mx-auto max-w-5xl px-4 py-6">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="min-w-0 truncate text-base font-semibold text-neutral-100">
-          What am I Watching
+          What Am I Watching
         </h1>
         <div className="flex shrink-0 items-center gap-4">
           <button

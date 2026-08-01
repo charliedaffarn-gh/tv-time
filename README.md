@@ -1,4 +1,4 @@
-# What am I Watching
+# What Am I Watching
 
 A personal show tracker: log shows you hear about, move them into "Watching"
 when you start, mark episodes as you go, and see poster art and upcoming air
