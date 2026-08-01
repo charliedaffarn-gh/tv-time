@@ -11,8 +11,16 @@ const SECTIONS: Section[] = [
   {
     heading: 'Tracking your shows',
     items: [
-      'Three lists: Library (heard about it, not started), Watching, and Finished.',
+      'Two tabs at the bottom: My TV for everything you\'re tracking, and What to watch for finding something new.',
+      'Three lists on My TV: Library (heard about it, not started), Watching, and Finished.',
       'Add a show by searching for it — poster art and details come in automatically.',
+    ],
+  },
+  {
+    heading: 'What to watch',
+    items: [
+      'Browse Trending, Popular, and Top Rated shows, or tap a genre to see what\'s in it.',
+      'One-tap add straight to your Library, same as Similar Shows.',
     ],
   },
   {
