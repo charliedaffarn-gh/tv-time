@@ -16,10 +16,12 @@ import { useAuth } from '../contexts/useAuth'
 import { AddShowModal } from './AddShowModal'
 import { HelpModal } from './HelpModal'
 import { PendingShares } from './PendingShares'
-import { ShowCard } from './ShowCard'
+import { ShowCard, type ShowCardView } from './ShowCard'
 import { TabBar } from './TabBar'
 import { UpcomingStrip } from './UpcomingStrip'
 import type { ShowShare, ShowStatus, TmdbSearchResult, UserShow, WatchedEpisode } from '../types'
+
+const VIEW_STORAGE_KEY = 'show-view-mode'
 
 export function Dashboard() {
   const { signOut } = useAuth()
@@ -33,6 +35,14 @@ export function Dashboard() {
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [watchedError, setWatchedError] = useState(false)
+  const [view, setView] = useState<ShowCardView>(
+    () => (localStorage.getItem(VIEW_STORAGE_KEY) === 'list' ? 'list' : 'grid'),
+  )
+
+  function changeView(next: ShowCardView) {
+    setView(next)
+    localStorage.setItem(VIEW_STORAGE_KEY, next)
+  }
 
   const refresh = useCallback(async () => {
     // Fetched independently on purpose: a failure loading watched-episode
@@ -197,8 +207,32 @@ export function Dashboard() {
 
       {activeTab === 'watching' && <UpcomingStrip shows={shows} />}
 
-      <div className="mb-4">
-        <TabBar active={activeTab} counts={counts} onChange={setActiveTab} />
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex-1">
+          <TabBar active={activeTab} counts={counts} onChange={setActiveTab} />
+        </div>
+        <div className="flex shrink-0 gap-1 text-xs">
+          <button
+            onClick={() => changeView('grid')}
+            className={
+              view === 'grid'
+                ? 'rounded-md bg-neutral-800 px-2 py-1 text-neutral-100'
+                : 'rounded-md px-2 py-1 text-neutral-500 hover:text-neutral-300'
+            }
+          >
+            Grid
+          </button>
+          <button
+            onClick={() => changeView('list')}
+            className={
+              view === 'list'
+                ? 'rounded-md bg-neutral-800 px-2 py-1 text-neutral-100'
+                : 'rounded-md px-2 py-1 text-neutral-500 hover:text-neutral-300'
+            }
+          >
+            List
+          </button>
+        </div>
       </div>
 
       {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
@@ -214,11 +248,18 @@ export function Dashboard() {
       ) : visibleShows.length === 0 ? (
         <p className="py-12 text-center text-neutral-500">{emptyMessage[activeTab]}</p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div
+          className={
+            view === 'grid'
+              ? 'grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
+              : 'flex flex-col gap-2'
+          }
+        >
           {visibleShows.map((show) => (
             <ShowCard
               key={show.id}
               show={show}
+              view={view}
               watched={watchedByShow.get(show.id) ?? emptySet}
               onStartWatching={() => handleStartWatching(show.id)}
               onMarkWatched={(season, episode) => handleMarkWatched(show.id, season, episode)}

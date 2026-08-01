@@ -1,12 +1,16 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { isShowConcluded, posterUrl } from '../lib/tmdb'
 import { useShowDetails } from '../hooks/useShowDetails'
 import { useUpNext } from '../hooks/useUpNext'
 import type { TmdbShowDetails, UserShow } from '../types'
 
+export type ShowCardView = 'grid' | 'list'
+
 interface ShowCardProps {
   show: UserShow
   watched: ReadonlySet<string>
+  view: ShowCardView
   onStartWatching: () => void
   onMarkWatched: (season: number, episode: number) => void
   onMoveToLibrary: () => void
@@ -16,6 +20,7 @@ interface ShowCardProps {
 export function ShowCard({
   show,
   watched,
+  view,
   onStartWatching,
   onMarkWatched,
   onMoveToLibrary,
@@ -25,6 +30,100 @@ export function ShowCard({
   const upNext = useUpNext(watched, show.status === 'watching' ? details : null)
 
   const poster = posterUrl(show.poster_path, 'w342')
+
+  let info: ReactNode = null
+  let actions: ReactNode = null
+
+  if (show.status === 'watching') {
+    info = (
+      <p className="text-xs text-neutral-400">
+        {upNext === undefined && 'Loading…'}
+        {upNext === null && details && caughtUpMessage(details)}
+        {upNext && (
+          <>
+            Up next: S{upNext.season}E{upNext.episode}
+            {upNext.name ? ` — ${upNext.name}` : ''}
+          </>
+        )}
+      </p>
+    )
+    actions = (
+      <div className="flex flex-wrap gap-2 text-xs">
+        <button
+          disabled={!upNext}
+          onClick={() => upNext && onMarkWatched(upNext.season, upNext.episode)}
+          className="rounded-md bg-indigo-600 px-2 py-1 font-medium text-white hover:bg-indigo-500 disabled:opacity-40"
+        >
+          Mark episode watched
+        </button>
+        <button
+          onClick={onRemove}
+          className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
+        >
+          Remove
+        </button>
+      </div>
+    )
+  } else if (show.status === 'library') {
+    actions = (
+      <div className="flex flex-wrap gap-2 text-xs">
+        <button
+          onClick={onStartWatching}
+          className="rounded-md bg-indigo-600 px-2 py-1 font-medium text-white hover:bg-indigo-500"
+        >
+          Start watching
+        </button>
+        <button
+          onClick={onRemove}
+          className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
+        >
+          Remove
+        </button>
+      </div>
+    )
+  } else {
+    actions = (
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-400">Finished</span>
+        <button
+          onClick={onMoveToLibrary}
+          className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-300 hover:bg-neutral-700"
+        >
+          Watch again
+        </button>
+        <button
+          onClick={onRemove}
+          className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
+        >
+          Remove
+        </button>
+      </div>
+    )
+  }
+
+  if (view === 'list') {
+    return (
+      <div className="flex gap-3 rounded-lg bg-neutral-900 p-2">
+        <Link to={`/show/${show.tmdb_id}`} className="shrink-0">
+          {poster ? (
+            <img src={poster} alt={show.title} className="h-16 w-11 rounded object-cover" />
+          ) : (
+            <div className="h-16 w-11 rounded bg-neutral-800" />
+          )}
+        </Link>
+        <div className="min-w-0 flex-1">
+          <Link
+            to={`/show/${show.tmdb_id}`}
+            className="block truncate font-medium text-neutral-100 hover:underline"
+          >
+            {show.title}
+          </Link>
+          {info}
+          <div className="mt-1">{actions}</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl bg-neutral-900 shadow-lg">
@@ -45,69 +144,13 @@ export function ShowCard({
           {show.title}
         </Link>
 
-        {show.status === 'watching' && (
+        {show.status === 'watching' ? (
           <div className="flex flex-1 flex-col justify-between gap-2">
-            <p className="text-xs text-neutral-400">
-              {upNext === undefined && 'Loading…'}
-              {upNext === null && details && caughtUpMessage(details)}
-              {upNext && (
-                <>
-                  Up next: S{upNext.season}E{upNext.episode}
-                  {upNext.name ? ` — ${upNext.name}` : ''}
-                </>
-              )}
-            </p>
-            <div className="flex flex-wrap gap-2 text-xs">
-              <button
-                disabled={!upNext}
-                onClick={() => upNext && onMarkWatched(upNext.season, upNext.episode)}
-                className="rounded-md bg-indigo-600 px-2 py-1 font-medium text-white hover:bg-indigo-500 disabled:opacity-40"
-              >
-                Mark episode watched
-              </button>
-              <button
-                onClick={onRemove}
-                className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
-              >
-                Remove
-              </button>
-            </div>
+            {info}
+            {actions}
           </div>
-        )}
-
-        {show.status === 'library' && (
-          <div className="mt-auto flex flex-wrap gap-2 text-xs">
-            <button
-              onClick={onStartWatching}
-              className="rounded-md bg-indigo-600 px-2 py-1 font-medium text-white hover:bg-indigo-500"
-            >
-              Start watching
-            </button>
-            <button
-              onClick={onRemove}
-              className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
-            >
-              Remove
-            </button>
-          </div>
-        )}
-
-        {show.status === 'finished' && (
-          <div className="mt-auto flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-400">Finished</span>
-            <button
-              onClick={onMoveToLibrary}
-              className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-300 hover:bg-neutral-700"
-            >
-              Watch again
-            </button>
-            <button
-              onClick={onRemove}
-              className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
-            >
-              Remove
-            </button>
-          </div>
+        ) : (
+          <div className="mt-auto">{actions}</div>
         )}
       </div>
     </div>
