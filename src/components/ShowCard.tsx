@@ -73,12 +73,6 @@ export function ShowCard({
               >
                 Move to finished
               </button>
-              <button
-                onClick={onMoveToLibrary}
-                className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-300 hover:bg-neutral-700"
-              >
-                Back to library
-              </button>
             </div>
           </div>
         )}
