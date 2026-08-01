@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { isShowConcluded, posterUrl } from '../lib/tmdb'
 import { useShowDetails } from '../hooks/useShowDetails'
 import { useUpNext } from '../hooks/useUpNext'
@@ -28,6 +28,8 @@ export function ShowCard({
 }: ShowCardProps) {
   const { details } = useShowDetails(show.tmdb_id)
   const upNext = useUpNext(watched, show.status === 'watching' ? details : null)
+  const location = useLocation()
+  const linkState = { from: location.pathname }
 
   const poster = posterUrl(show.poster_path, 'w342')
 
@@ -104,7 +106,7 @@ export function ShowCard({
   if (view === 'list') {
     return (
       <div className="flex gap-3 rounded-lg bg-neutral-900 p-2">
-        <Link to={`/show/${show.tmdb_id}`} className="shrink-0">
+        <Link to={`/show/${show.tmdb_id}`} state={linkState} className="shrink-0">
           {poster ? (
             <img src={poster} alt={show.title} className="h-16 w-11 rounded object-cover" />
           ) : (
@@ -114,6 +116,7 @@ export function ShowCard({
         <div className="min-w-0 flex-1">
           <Link
             to={`/show/${show.tmdb_id}`}
+            state={linkState}
             className="block truncate font-medium text-neutral-100 hover:underline"
           >
             {show.title}
@@ -127,7 +130,7 @@ export function ShowCard({
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl bg-neutral-900 shadow-lg">
-      <Link to={`/show/${show.tmdb_id}`} className="block">
+      <Link to={`/show/${show.tmdb_id}`} state={linkState} className="block">
         <div className="aspect-[2/3] w-full bg-neutral-800">
           {poster ? (
             <img src={poster} alt={show.title} className="h-full w-full object-cover" />
@@ -140,7 +143,11 @@ export function ShowCard({
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-3">
-        <Link to={`/show/${show.tmdb_id}`} className="line-clamp-2 font-medium text-neutral-100 hover:underline">
+        <Link
+          to={`/show/${show.tmdb_id}`}
+          state={linkState}
+          className="line-clamp-2 font-medium text-neutral-100 hover:underline"
+        >
           {show.title}
         </Link>
 

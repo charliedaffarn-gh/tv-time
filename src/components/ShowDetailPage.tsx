@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   addShow,
   getUserShowByTmdbId,
@@ -22,6 +22,8 @@ export function ShowDetailPage() {
   const { tmdbId } = useParams<{ tmdbId: string }>()
   const numericTmdbId = Number(tmdbId)
   const navigate = useNavigate()
+  const location = useLocation()
+  const backTo = (location.state as { from?: string } | null)?.from ?? '/'
 
   const [userShow, setUserShow] = useState<UserShow | null | undefined>(undefined)
   const [watched, setWatched] = useState<Set<string>>(new Set())
@@ -176,7 +178,7 @@ export function ShowDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <Link to="/" className="mb-4 inline-block text-sm text-neutral-400 hover:text-neutral-200">
+      <Link to={backTo} className="mb-4 inline-block text-sm text-neutral-400 hover:text-neutral-200">
         ← Back
       </Link>
 
