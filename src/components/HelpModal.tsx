@@ -48,8 +48,12 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    heading: 'On your phone',
-    items: ['Add it to your home screen from your browser menu — it opens full-screen, like a normal app.'],
+    heading: 'Install it as an app',
+    items: [
+      'Makes it feel like a normal app — full-screen, with its own icon on your home screen.',
+      'Android, in Chrome: tap the ⋮ menu, then "Install app" (or "Add to Home screen"), then confirm.',
+      'iPhone, in Safari: tap the Share icon, then "Add to Home Screen", then tap Add. Has to be Safari — other iPhone browsers can\'t install it.',
+    ],
   },
   {
     heading: 'Grid or list',
