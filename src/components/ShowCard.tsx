@@ -59,7 +59,7 @@ export function ShowCard({
                 </>
               )}
             </p>
-            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            <div className="flex flex-wrap gap-2 text-xs">
               <button
                 disabled={!upNext}
                 onClick={() => upNext && onMarkWatched(upNext.season, upNext.episode)}
@@ -67,10 +67,16 @@ export function ShowCard({
               >
                 Mark episode watched
               </button>
-              <button onClick={onMoveToFinished} className="text-neutral-400 hover:text-neutral-200">
+              <button
+                onClick={onMoveToFinished}
+                className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-300 hover:bg-neutral-700"
+              >
                 Move to finished
               </button>
-              <button onClick={onMoveToLibrary} className="text-neutral-400 hover:text-neutral-200">
+              <button
+                onClick={onMoveToLibrary}
+                className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-300 hover:bg-neutral-700"
+              >
                 Back to library
               </button>
             </div>
@@ -78,26 +84,35 @@ export function ShowCard({
         )}
 
         {show.status === 'library' && (
-          <div className="mt-auto flex flex-wrap gap-x-3 gap-y-1 text-xs">
+          <div className="mt-auto flex flex-wrap gap-2 text-xs">
             <button
               onClick={onStartWatching}
               className="rounded-md bg-indigo-600 px-2 py-1 font-medium text-white hover:bg-indigo-500"
             >
               Start watching
             </button>
-            <button onClick={onRemove} className="text-neutral-500 hover:text-neutral-300">
+            <button
+              onClick={onRemove}
+              className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
+            >
               Remove
             </button>
           </div>
         )}
 
         {show.status === 'finished' && (
-          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+          <div className="mt-auto flex flex-wrap items-center gap-2 text-xs">
             <span className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-400">Finished</span>
-            <button onClick={onMoveToLibrary} className="text-neutral-400 hover:text-neutral-200">
+            <button
+              onClick={onMoveToLibrary}
+              className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-300 hover:bg-neutral-700"
+            >
               Watch again
             </button>
-            <button onClick={onRemove} className="text-neutral-500 hover:text-neutral-300">
+            <button
+              onClick={onRemove}
+              className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
+            >
               Remove
             </button>
           </div>
