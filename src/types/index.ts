@@ -19,6 +19,25 @@ export interface WatchedEpisode {
   watched_at: string
 }
 
+export interface Profile {
+  id: string
+  display_name: string
+}
+
+export type ShareStatus = 'pending' | 'accepted' | 'dismissed'
+
+export interface ShowShare {
+  id: string
+  from_user_id: string
+  to_user_id: string
+  tmdb_id: number
+  title: string
+  poster_path: string | null
+  status: ShareStatus
+  created_at: string
+  from_profile: { display_name: string } | null
+}
+
 export interface TmdbSearchResult {
   id: number
   name: string

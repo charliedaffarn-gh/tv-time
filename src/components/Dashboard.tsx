@@ -11,18 +11,21 @@ import {
 import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
 import { fetchShowDetailsCached } from '../lib/tmdbCache'
 import { isShowConcluded } from '../lib/tmdb'
+import { acceptShare, dismissShare, listPendingShares } from '../lib/shares'
 import { useAuth } from '../contexts/useAuth'
 import { AddShowModal } from './AddShowModal'
+import { PendingShares } from './PendingShares'
 import { ShowCard } from './ShowCard'
 import { TabBar } from './TabBar'
 import { UpcomingStrip } from './UpcomingStrip'
-import type { ShowStatus, TmdbSearchResult, UserShow, WatchedEpisode } from '../types'
+import type { ShowShare, ShowStatus, TmdbSearchResult, UserShow, WatchedEpisode } from '../types'
 
 export function Dashboard() {
   const { signOut } = useAuth()
   const [shows, setShows] = useState<UserShow[]>([])
   const [watchedByShow, setWatchedByShow] = useState<Map<string, Set<string>>>(new Map())
   const [watchingOrder, setWatchingOrder] = useState<Map<string, WatchingSortInfo>>(new Map())
+  const [pendingShares, setPendingShares] = useState<ShowShare[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<ShowStatus>('watching')
   const [showAddModal, setShowAddModal] = useState(false)
@@ -49,6 +52,14 @@ export function Dashboard() {
       setWatchedError(false)
     } catch {
       setWatchedError(true)
+    }
+
+    // Also independent: shares shouldn't have any bearing on whether the
+    // shows list itself loads.
+    try {
+      setPendingShares(await listPendingShares())
+    } catch {
+      // Quietly retry on next refresh -- not worth a banner for this.
     }
 
     setLoading(false)
@@ -131,6 +142,8 @@ export function Dashboard() {
 
   const handleMoveToLibrary = (id: string) => runAction(() => setStatus(id, 'library'))
   const handleRemove = (id: string) => runAction(() => removeShow(id))
+  const handleAcceptShare = (share: ShowShare) => runAction(() => acceptShare(share))
+  const handleDismissShare = (shareId: string) => runAction(() => dismissShare(shareId))
 
   const counts: Record<ShowStatus, number> = {
     library: shows.filter((s) => s.status === 'library').length,
@@ -165,6 +178,12 @@ export function Dashboard() {
           Sign out
         </button>
       </div>
+
+      <PendingShares
+        shares={pendingShares}
+        onAccept={handleAcceptShare}
+        onDismiss={handleDismissShare}
+      />
 
       {activeTab === 'watching' && <UpcomingStrip shows={shows} />}
 

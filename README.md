@@ -22,10 +22,12 @@ login for yourself and each friend directly in Supabase (see below).
 ### 1. Supabase project
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In the SQL Editor, run the contents of `supabase/migrations/0001_init.sql`,
-   then `0002_episode_ledger.sql` (run them in order — the second depends on
-   the first). Whenever a new migration file is added later, run it the same
-   way.
+2. In the SQL Editor, run each file in `supabase/migrations/` **in order**
+   (`0001_init.sql`, then `0002_episode_ledger.sql`, then `0003_sharing.sql`,
+   and so on) — later ones depend on earlier ones. Run any new migration file
+   the same way once it's deployed, and always before it, same reasoning as
+   `0002`: an in-between state where the code expects a table that doesn't
+   exist yet will misbehave.
 3. In **Project Settings -> API Keys**, copy the **Publishable key**
    (`sb_publishable_...`). You don't need the secret key for this app.
 4. For the **Project URL**, use the **Connect** button at the top of your

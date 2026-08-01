@@ -13,6 +13,7 @@ import { useShowDetails } from '../hooks/useShowDetails'
 import { fetchSeasonEpisodesCached } from '../lib/tmdbCache'
 import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
 import { isShowConcluded, posterUrl } from '../lib/tmdb'
+import { ShareModal } from './ShareModal'
 import type { ShowStatus, TmdbEpisodeRef, UserShow } from '../types'
 
 export function ShowDetailPage() {
@@ -25,6 +26,7 @@ export function ShowDetailPage() {
   const [expandedSeason, setExpandedSeason] = useState<number | null>(null)
   const [seasonEpisodes, setSeasonEpisodes] = useState<Map<number, TmdbEpisodeRef[]>>(new Map())
   const [seasonLoading, setSeasonLoading] = useState<number | null>(null)
+  const [showShareModal, setShowShareModal] = useState(false)
 
   const { details } = useShowDetails(numericTmdbId)
 
@@ -212,12 +214,25 @@ export function ShowDetailPage() {
           </button>
         )}
         <button
+          onClick={() => setShowShareModal(true)}
+          className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
+        >
+          Share
+        </button>
+        <button
           onClick={handleRemove}
           className="rounded-md bg-neutral-800 px-3 py-1.5 text-red-400 hover:bg-neutral-700"
         >
           Remove
         </button>
       </div>
+
+      {showShareModal && (
+        <ShareModal
+          onClose={() => setShowShareModal(false)}
+          show={{ tmdb_id: userShow.tmdb_id, title: userShow.title, poster_path: userShow.poster_path }}
+        />
+      )}
 
       <div className="mt-6 space-y-2">
         {realSeasons.map((season) => (
