@@ -40,3 +40,7 @@ export function getShowDetails(tmdbId: number): Promise<TmdbShowDetails> {
 export function getSeasonEpisodes(tmdbId: number, season: number): Promise<TmdbSeasonDetails> {
   return authedFetch(`/api/tmdb/season?id=${tmdbId}&season=${season}`)
 }
+
+export function getRecommendations(tmdbId: number): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch(`/api/tmdb/recommendations?id=${tmdbId}`)
+}

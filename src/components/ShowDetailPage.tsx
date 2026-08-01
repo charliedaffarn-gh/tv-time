@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
+  addShow,
   getUserShowByTmdbId,
   listWatchedEpisodesForShow,
   markEpisodeUnwatched,
@@ -13,8 +14,9 @@ import { useShowDetails } from '../hooks/useShowDetails'
 import { fetchSeasonEpisodesCached } from '../lib/tmdbCache'
 import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
 import { isShowConcluded, posterUrl, WATCH_REGION } from '../lib/tmdb'
+import { RecommendationsModal } from './RecommendationsModal'
 import { ShareModal } from './ShareModal'
-import type { ShowStatus, TmdbEpisodeRef, UserShow } from '../types'
+import type { ShowStatus, TmdbEpisodeRef, TmdbSearchResult, UserShow } from '../types'
 
 export function ShowDetailPage() {
   const { tmdbId } = useParams<{ tmdbId: string }>()
@@ -27,6 +29,7 @@ export function ShowDetailPage() {
   const [seasonEpisodes, setSeasonEpisodes] = useState<Map<number, TmdbEpisodeRef[]>>(new Map())
   const [seasonLoading, setSeasonLoading] = useState<number | null>(null)
   const [showShareModal, setShowShareModal] = useState(false)
+  const [showRecommendationsModal, setShowRecommendationsModal] = useState(false)
 
   const { details } = useShowDetails(numericTmdbId)
 
@@ -129,6 +132,15 @@ export function ShowDetailPage() {
     if (!userShow) return
     await removeShow(userShow.id)
     navigate('/')
+  }
+
+  async function handleAddRecommendation(show: TmdbSearchResult): Promise<{ error: string | null }> {
+    try {
+      await addShow({ tmdb_id: show.id, title: show.name, poster_path: show.poster_path })
+      return { error: null }
+    } catch {
+      return { error: 'Could not add that show. Try again.' }
+    }
   }
 
   if (userShow === undefined || !details) {
@@ -247,6 +259,12 @@ export function ShowDetailPage() {
           Share
         </button>
         <button
+          onClick={() => setShowRecommendationsModal(true)}
+          className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
+        >
+          Similar shows
+        </button>
+        <button
           onClick={handleRemove}
           className="rounded-md bg-neutral-800 px-3 py-1.5 text-red-400 hover:bg-neutral-700"
         >
@@ -258,6 +276,15 @@ export function ShowDetailPage() {
         <ShareModal
           onClose={() => setShowShareModal(false)}
           show={{ tmdb_id: userShow.tmdb_id, title: userShow.title, poster_path: userShow.poster_path }}
+        />
+      )}
+
+      {showRecommendationsModal && (
+        <RecommendationsModal
+          onClose={() => setShowRecommendationsModal(false)}
+          tmdbId={userShow.tmdb_id}
+          title={userShow.title}
+          onAdd={handleAddRecommendation}
         />
       )}
 

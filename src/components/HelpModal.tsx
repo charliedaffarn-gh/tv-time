@@ -38,6 +38,7 @@ const SECTIONS: Section[] = [
       "Tap a poster or title for a show's synopsis, rating, genres, network, and a direct link to IMDb.",
       '"Coming up" on the Watching tab shows upcoming air dates at a glance.',
       '"Where to watch" links out to streaming services carrying the show, when available.',
+      '"Similar shows" suggests other shows like it, with a one-tap add straight to your Library.',
     ],
   },
   {
