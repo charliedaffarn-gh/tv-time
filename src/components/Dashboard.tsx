@@ -3,11 +3,13 @@ import {
   addShow,
   listAllWatchedEpisodes,
   listUserShows,
+  listWatchedEpisodesForShow,
   markEpisodeWatched,
   removeShow,
   setStatus,
 } from '../lib/shows'
-import { episodeKey } from '../lib/nextEpisode'
+import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
+import { fetchShowDetailsCached } from '../lib/tmdbCache'
 import { useAuth } from '../contexts/useAuth'
 import { AddShowModal } from './AddShowModal'
 import { ShowCard } from './ShowCard'
@@ -75,8 +77,24 @@ export function Dashboard() {
   }
 
   const handleStartWatching = (id: string) => runAction(() => setStatus(id, 'watching'))
+
   const handleMarkWatched = (id: string, season: number, episode: number) =>
-    runAction(() => markEpisodeWatched(id, season, episode))
+    runAction(async () => {
+      await markEpisodeWatched(id, season, episode)
+
+      const show = shows.find((s) => s.id === id)
+      if (!show) return
+      const [rows, tmdbDetails] = await Promise.all([
+        listWatchedEpisodesForShow(id),
+        fetchShowDetailsCached(show.tmdb_id),
+      ])
+      const freshWatched = new Set(rows.map((r) => episodeKey(r.season_number, r.episode_number)))
+      const caughtUp = computeNextEpisode(freshWatched, tmdbDetails.seasons) === null
+      if (caughtUp) {
+        await setStatus(id, 'finished')
+      }
+    })
+
   const handleMoveToLibrary = (id: string) => runAction(() => setStatus(id, 'library'))
   const handleMoveToFinished = (id: string) => runAction(() => setStatus(id, 'finished'))
   const handleRemove = (id: string) => runAction(() => removeShow(id))

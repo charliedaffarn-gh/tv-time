@@ -11,7 +11,7 @@ import {
 } from '../lib/shows'
 import { useShowDetails } from '../hooks/useShowDetails'
 import { fetchSeasonEpisodesCached } from '../lib/tmdbCache'
-import { episodeKey } from '../lib/nextEpisode'
+import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
 import { posterUrl } from '../lib/tmdb'
 import type { ShowStatus, TmdbEpisodeRef, UserShow } from '../types'
 
@@ -47,19 +47,33 @@ export function ShowDetailPage() {
     }
   }, [numericTmdbId])
 
-  async function refreshWatched(userShowId: string) {
+  async function refreshWatched(userShowId: string): Promise<Set<string>> {
     const rows = await listWatchedEpisodesForShow(userShowId)
-    setWatched(new Set(rows.map((r) => episodeKey(r.season_number, r.episode_number))))
+    const fresh = new Set(rows.map((r) => episodeKey(r.season_number, r.episode_number)))
+    setWatched(fresh)
+    return fresh
   }
 
-  /** Runs a "mark watched" mutation, then starts the show watching if it was still sitting in the library. */
-  async function markWatchedAndMaybeStartWatching(mutate: () => Promise<void>) {
-    if (!userShow) return
+  /**
+   * Runs a "mark watched" mutation, then updates status to match: starts the
+   * show watching if it was still sitting in the library, or moves it to
+   * Finished if that was the last unwatched episode.
+   */
+  async function markWatchedAndUpdateStatus(mutate: () => Promise<void>) {
+    if (!userShow || !details) return
     await mutate()
-    await refreshWatched(userShow.id)
-    if (userShow.status === 'library') {
-      await setStatus(userShow.id, 'watching')
-      setUserShow((prev) => (prev ? { ...prev, status: 'watching' } : prev))
+    const freshWatched = await refreshWatched(userShow.id)
+
+    const caughtUp = computeNextEpisode(freshWatched, details.seasons) === null
+    const nextStatus: ShowStatus | null = caughtUp
+      ? 'finished'
+      : userShow.status === 'library'
+        ? 'watching'
+        : null
+
+    if (nextStatus) {
+      await setStatus(userShow.id, nextStatus)
+      setUserShow((prev) => (prev ? { ...prev, status: nextStatus } : prev))
     }
   }
 
@@ -87,7 +101,7 @@ export function ShowDetailPage() {
       await markEpisodeUnwatched(userShow.id, seasonNumber, episodeNumber)
       await refreshWatched(userShow.id)
     } else {
-      await markWatchedAndMaybeStartWatching(() =>
+      await markWatchedAndUpdateStatus(() =>
         markEpisodeWatched(userShow.id, seasonNumber, episodeNumber),
       )
     }
@@ -95,7 +109,7 @@ export function ShowDetailPage() {
 
   async function handleMarkSeasonWatched(seasonNumber: number, episodeCount: number) {
     if (!userShow) return
-    await markWatchedAndMaybeStartWatching(() =>
+    await markWatchedAndUpdateStatus(() =>
       markSeasonWatched(userShow.id, seasonNumber, episodeCount),
     )
   }
