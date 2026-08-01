@@ -23,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { status, body } = await tmdbFetch(`/tv/${id}/season/${season}`)
-    res.setHeader('Cache-Control', 'private, max-age=3600')
+    res.setHeader('Cache-Control', 'private, max-age=300')
     res.status(status).json(body)
   } catch {
     res.status(502).json({ error: 'TMDB request failed' })
