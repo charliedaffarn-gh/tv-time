@@ -20,7 +20,7 @@ export default defineConfig({
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'],
       manifest: {
         name: 'What am I Watching',
-        short_name: 'Watching',
+        short_name: 'What am I Watching',
         description: 'Track what you\'re watching.',
         theme_color: '#4f46e5',
         background_color: '#4f46e5',
