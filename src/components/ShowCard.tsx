@@ -10,7 +10,6 @@ interface ShowCardProps {
   onStartWatching: () => void
   onMarkWatched: (season: number, episode: number) => void
   onMoveToLibrary: () => void
-  onMoveToFinished: () => void
   onRemove: () => void
 }
 
@@ -20,7 +19,6 @@ export function ShowCard({
   onStartWatching,
   onMarkWatched,
   onMoveToLibrary,
-  onMoveToFinished,
   onRemove,
 }: ShowCardProps) {
   const { details } = useShowDetails(show.tmdb_id)
@@ -68,10 +66,10 @@ export function ShowCard({
                 Mark episode watched
               </button>
               <button
-                onClick={onMoveToFinished}
-                className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-300 hover:bg-neutral-700"
+                onClick={onRemove}
+                className="rounded-md bg-neutral-800 px-2 py-1 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300"
               >
-                Remove from Watching
+                Remove
               </button>
             </div>
           </div>

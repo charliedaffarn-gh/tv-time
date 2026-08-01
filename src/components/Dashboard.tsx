@@ -97,7 +97,6 @@ export function Dashboard() {
     })
 
   const handleMoveToLibrary = (id: string) => runAction(() => setStatus(id, 'library'))
-  const handleMoveToFinished = (id: string) => runAction(() => setStatus(id, 'finished'))
   const handleRemove = (id: string) => runAction(() => removeShow(id))
 
   const counts: Record<ShowStatus, number> = {
@@ -152,7 +151,6 @@ export function Dashboard() {
               onStartWatching={() => handleStartWatching(show.id)}
               onMarkWatched={(season, episode) => handleMarkWatched(show.id, season, episode)}
               onMoveToLibrary={() => handleMoveToLibrary(show.id)}
-              onMoveToFinished={() => handleMoveToFinished(show.id)}
               onRemove={() => handleRemove(show.id)}
             />
           ))}

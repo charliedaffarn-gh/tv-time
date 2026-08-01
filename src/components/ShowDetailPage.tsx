@@ -195,12 +195,12 @@ export function ShowDetailPage() {
             {userShow.status === 'finished' ? 'Watch again' : 'Start watching'}
           </button>
         )}
-        {userShow.status !== 'finished' && (
+        {userShow.status === 'library' && (
           <button
             onClick={() => handleStatusChange('finished')}
             className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
           >
-            {userShow.status === 'watching' ? 'Remove from Watching' : 'Mark finished'}
+            Mark finished
           </button>
         )}
         {userShow.status !== 'library' && (
