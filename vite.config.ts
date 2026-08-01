@@ -10,6 +10,13 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        // Multiple deploys in quick succession otherwise risk a browser
+        // holding onto an old service worker whose cached shell references
+        // asset hashes the new deployment no longer serves -- a blank page.
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+      },
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'],
       manifest: {
         name: 'TV Time',
