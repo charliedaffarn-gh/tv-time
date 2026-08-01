@@ -237,7 +237,7 @@ export function ShowDetailPage() {
             onClick={() => handleStatusChange('library')}
             className="rounded-md bg-neutral-800 px-3 py-1.5 text-neutral-300 hover:bg-neutral-700"
           >
-            Back to library
+            {userShow.status === 'watching' ? 'Stop watching' : 'Back to library'}
           </button>
         )}
         <button
