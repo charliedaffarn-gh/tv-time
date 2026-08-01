@@ -251,11 +251,11 @@ export function Dashboard() {
         <p className="py-12 text-center text-neutral-500">{emptyMessage[activeTab]}</p>
       ) : (
         <div
-          className={
+          className={`pb-24 ${
             view === 'grid'
               ? 'grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
               : 'flex flex-col gap-2'
-          }
+          }`}
         >
           {visibleShows.map((show) => (
             <ShowCard
