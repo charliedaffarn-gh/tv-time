@@ -1,8 +1,9 @@
-# TV Time
+# What am I Watching
 
 A personal show tracker: log shows you hear about, move them into "Watching"
 when you start, mark episodes as you go, and see poster art and upcoming air
-dates. Built as an installable PWA after the original TV Time app shut down.
+dates. Built as an installable PWA after the original TV Time Android app
+shut down.
 
 ## Stack
 

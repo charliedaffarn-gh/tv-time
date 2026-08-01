@@ -64,7 +64,7 @@ export function HelpModal({ onClose }: HelpModalProps) {
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-16">
       <div className="w-full max-w-lg rounded-xl bg-neutral-900 p-4 shadow-xl">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-neutral-100">How TV Time works</h2>
+          <h2 className="text-lg font-semibold text-neutral-100">How it works</h2>
           <button
             onClick={onClose}
             className="rounded-full p-1 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"

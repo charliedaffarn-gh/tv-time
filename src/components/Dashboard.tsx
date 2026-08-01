@@ -185,7 +185,7 @@ export function Dashboard() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-neutral-100">TV Time</h1>
+        <h1 className="text-xl font-semibold text-neutral-100">Watching</h1>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setShowHelpModal(true)}
