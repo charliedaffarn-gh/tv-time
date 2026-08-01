@@ -8,7 +8,7 @@ interface GenreChipRowProps {
 
 export function GenreChipRow({ genres, selectedGenreId, onSelect }: GenreChipRowProps) {
   return (
-    <div>
+    <div className="mb-6">
       <h2 className="mb-2 text-sm font-medium text-neutral-400">Browse by genre</h2>
       <div className="flex gap-2 overflow-x-auto pb-1">
         {genres.map((genre) => {

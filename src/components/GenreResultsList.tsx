@@ -8,6 +8,7 @@ interface GenreResultsListProps {
   error: string | null
   getState: (tmdbId: number) => ShowQuickAddState
   onAdd: (show: TmdbSearchResult) => void
+  onBack: () => void
 }
 
 export function GenreResultsList({
@@ -17,9 +18,16 @@ export function GenreResultsList({
   error,
   getState,
   onAdd,
+  onBack,
 }: GenreResultsListProps) {
   return (
     <div className="mb-6">
+      <button
+        onClick={onBack}
+        className="mb-2 text-sm text-indigo-400 hover:underline"
+      >
+        ← Back to what to watch
+      </button>
       <h2 className="mb-2 text-sm font-medium text-neutral-400">{genreName}</h2>
       {loading && <p className="text-sm text-neutral-500">Loading…</p>}
       {error && <p className="text-sm text-red-400">{error}</p>}

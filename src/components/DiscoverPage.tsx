@@ -110,6 +110,11 @@ export function DiscoverPage() {
     <div>
       {addError && <p className="mb-4 text-sm text-red-400">{addError}</p>}
 
+      {genresError && <p className="mb-2 text-sm text-red-400">{genresError}</p>}
+      {genres.length > 0 && (
+        <GenreChipRow genres={genres} selectedGenreId={selectedGenreId} onSelect={setSelectedGenreId} />
+      )}
+
       {selectedGenreId === null ? (
         <>
           <ChartRow
@@ -145,12 +150,8 @@ export function DiscoverPage() {
           error={genreError}
           getState={getItemState}
           onAdd={handleAddShow}
+          onBack={() => setSelectedGenreId(null)}
         />
-      )}
-
-      {genresError && <p className="mb-2 text-sm text-red-400">{genresError}</p>}
-      {genres.length > 0 && (
-        <GenreChipRow genres={genres} selectedGenreId={selectedGenreId} onSelect={setSelectedGenreId} />
       )}
     </div>
   )
