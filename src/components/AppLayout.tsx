@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useAuth } from '../contexts/useAuth'
 import { BottomNav } from './BottomNav'
+import { FeedbackModal } from './FeedbackModal'
 import { HelpModal } from './HelpModal'
 
 export function AppLayout() {
   const { signOut } = useAuth()
   const [showHelpModal, setShowHelpModal] = useState(false)
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false)
 
   return (
     <>
@@ -25,6 +27,12 @@ export function AppLayout() {
             >
               Help
             </button>
+            <button
+              onClick={() => setShowFeedbackModal(true)}
+              className="text-sm text-neutral-500 hover:text-neutral-300"
+            >
+              Feedback
+            </button>
             <button onClick={signOut} className="text-sm text-neutral-500 hover:text-neutral-300">
               Sign out
             </button>
@@ -37,6 +45,7 @@ export function AppLayout() {
       <BottomNav />
 
       {showHelpModal && <HelpModal onClose={() => setShowHelpModal(false)} />}
+      {showFeedbackModal && <FeedbackModal onClose={() => setShowFeedbackModal(false)} />}
     </>
   )
 }
