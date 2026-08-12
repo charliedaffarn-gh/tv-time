@@ -10,9 +10,9 @@ import {
 } from '../lib/shows'
 import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
 import { fetchShowDetailsCached } from '../lib/tmdbCache'
-import { isShowConcluded } from '../lib/tmdb'
+import { isShowConcluded, searchShows } from '../lib/tmdb'
 import { acceptShare, dismissShare, listPendingShares } from '../lib/shares'
-import { AddShowModal } from './AddShowModal'
+import { AddMediaModal } from './AddMediaModal'
 import { PendingShares } from './PendingShares'
 import { ShowCard, type ShowCardView } from './ShowCard'
 import { TabBar } from './TabBar'
@@ -267,10 +267,13 @@ export function Dashboard() {
       </button>
 
       {showAddModal && (
-        <AddShowModal
+        <AddMediaModal
           onClose={() => setShowAddModal(false)}
           onAdd={handleAdd}
           existingTmdbIds={existingTmdbIds}
+          searchFn={searchShows}
+          title="Add a show"
+          placeholder="Search for a show…"
         />
       )}
     </>

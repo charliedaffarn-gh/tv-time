@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getRecommendations } from '../lib/tmdb'
 import { listUserShows } from '../lib/shows'
-import { ShowQuickAddItem, type ShowQuickAddState } from './ShowQuickAddItem'
+import { MediaQuickAddItem, type MediaQuickAddState } from './MediaQuickAddItem'
 import type { TmdbSearchResult } from '../types'
 
 interface RecommendationsModalProps {
@@ -63,14 +63,14 @@ export function RecommendationsModal({ onClose, tmdbId, title, onAdd }: Recommen
 
         <ul className="max-h-96 space-y-1 overflow-y-auto">
           {results.map((show) => {
-            const state: ShowQuickAddState =
+            const state: MediaQuickAddState =
               existingTmdbIds.has(show.id) || addedIds.has(show.id)
                 ? 'added'
                 : addingId === show.id
                   ? 'adding'
                   : 'idle'
             return (
-              <ShowQuickAddItem
+              <MediaQuickAddItem
                 key={show.id}
                 show={show}
                 layout="row"

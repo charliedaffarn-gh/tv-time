@@ -1,5 +1,5 @@
 import { useEdgeFade } from '../hooks/useEdgeFade'
-import { ShowQuickAddItem, type ShowQuickAddState } from './ShowQuickAddItem'
+import { MediaQuickAddItem, type MediaQuickAddState } from './MediaQuickAddItem'
 import type { TmdbSearchResult } from '../types'
 
 interface ChartRowProps {
@@ -7,7 +7,7 @@ interface ChartRowProps {
   items: TmdbSearchResult[]
   loading: boolean
   error: string | null
-  getState: (tmdbId: number) => ShowQuickAddState
+  getState: (tmdbId: number) => MediaQuickAddState
   onAdd: (show: TmdbSearchResult) => void
 }
 
@@ -26,7 +26,7 @@ export function ChartRow({ title, items, loading, error, getState, onAdd }: Char
         <div className="relative">
           <div ref={scrollRef} className="flex gap-3 overflow-x-auto pb-1">
             {items.map((show) => (
-              <ShowQuickAddItem
+              <MediaQuickAddItem
                 key={show.id}
                 show={show}
                 layout="card"

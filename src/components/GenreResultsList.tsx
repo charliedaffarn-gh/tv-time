@@ -1,4 +1,4 @@
-import { ShowQuickAddItem, type ShowQuickAddState } from './ShowQuickAddItem'
+import { MediaQuickAddItem, type MediaQuickAddState } from './MediaQuickAddItem'
 import type { TmdbSearchResult } from '../types'
 
 interface GenreResultsListProps {
@@ -6,7 +6,7 @@ interface GenreResultsListProps {
   items: TmdbSearchResult[]
   loading: boolean
   error: string | null
-  getState: (tmdbId: number) => ShowQuickAddState
+  getState: (tmdbId: number) => MediaQuickAddState
   onAdd: (show: TmdbSearchResult) => void
   onBack: () => void
 }
@@ -36,7 +36,7 @@ export function GenreResultsList({
       )}
       <ul className="space-y-1">
         {items.map((show) => (
-          <ShowQuickAddItem
+          <MediaQuickAddItem
             key={show.id}
             show={show}
             layout="row"

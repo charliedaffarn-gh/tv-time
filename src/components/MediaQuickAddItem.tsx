@@ -2,25 +2,26 @@ import { Link, useLocation } from 'react-router-dom'
 import { posterUrl } from '../lib/tmdb'
 import type { TmdbSearchResult } from '../types'
 
-export type ShowQuickAddState = 'idle' | 'adding' | 'added'
+export type MediaQuickAddState = 'idle' | 'adding' | 'added'
 
-interface ShowQuickAddItemProps {
+interface MediaQuickAddItemProps {
   show: TmdbSearchResult
   layout: 'row' | 'card'
-  state: ShowQuickAddState
+  state: MediaQuickAddState
   onAdd: () => void
 }
 
-const BUTTON_LABEL: Record<ShowQuickAddState, string> = {
+const BUTTON_LABEL: Record<MediaQuickAddState, string> = {
   idle: 'Add',
   adding: 'Adding…',
   added: 'Added',
 }
 
-export function ShowQuickAddItem({ show, layout, state, onAdd }: ShowQuickAddItemProps) {
+export function MediaQuickAddItem({ show, layout, state, onAdd }: MediaQuickAddItemProps) {
   const location = useLocation()
   const year = show.first_air_date?.slice(0, 4)
   const poster = posterUrl(show.poster_path, 'w200')
+  const href = show.media_type === 'movie' ? `/film/${show.id}` : `/show/${show.id}`
   const button = (
     <button
       disabled={state !== 'idle'}
@@ -34,7 +35,7 @@ export function ShowQuickAddItem({ show, layout, state, onAdd }: ShowQuickAddIte
   if (layout === 'card') {
     return (
       <div className="flex w-32 shrink-0 flex-col gap-2 sm:w-36">
-        <Link to={`/show/${show.id}`} state={{ from: location.pathname }}>
+        <Link to={href} state={{ from: location.pathname }}>
           <div className="aspect-[2/3] w-full overflow-hidden rounded-lg bg-neutral-800">
             {poster ? (
               <img src={poster} alt={show.name} className="h-full w-full object-cover" />
@@ -54,7 +55,7 @@ export function ShowQuickAddItem({ show, layout, state, onAdd }: ShowQuickAddIte
   return (
     <li className="flex items-center gap-3 rounded-lg p-2">
       <Link
-        to={`/show/${show.id}`}
+        to={href}
         state={{ from: location.pathname }}
         className="flex min-w-0 flex-1 items-center gap-3"
       >

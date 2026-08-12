@@ -5,7 +5,7 @@ import { addShow, listUserShows } from '../lib/shows'
 import { ChartRow } from './ChartRow'
 import { GenreChipRow } from './GenreChipRow'
 import { GenreResultsList } from './GenreResultsList'
-import type { ShowQuickAddState } from './ShowQuickAddItem'
+import type { MediaQuickAddState } from './MediaQuickAddItem'
 import type { TmdbGenre, TmdbSearchResult } from '../types'
 
 interface ChartState {
@@ -81,7 +81,7 @@ export function DiscoverPage() {
     }
   }, [selectedGenreId])
 
-  function getItemState(tmdbId: number): ShowQuickAddState {
+  function getItemState(tmdbId: number): MediaQuickAddState {
     if (existingTmdbIds.has(tmdbId) || addedIds.has(tmdbId)) return 'added'
     if (addingIds.has(tmdbId)) return 'adding'
     return 'idle'
