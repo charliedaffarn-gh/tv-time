@@ -21,6 +21,12 @@ import type { ShowShare, ShowStatus, TmdbSearchResult, UserShow, WatchedEpisode 
 
 const VIEW_STORAGE_KEY = 'show-view-mode'
 
+const SHOW_TABS: { key: ShowStatus; label: string }[] = [
+  { key: 'watching', label: 'Watching' },
+  { key: 'library', label: 'Library' },
+  { key: 'finished', label: 'Finished' },
+]
+
 export function Dashboard() {
   const [shows, setShows] = useState<UserShow[]>([])
   const [watchedByShow, setWatchedByShow] = useState<Map<string, Set<string>>>(new Map())
@@ -190,7 +196,7 @@ export function Dashboard() {
 
       <div className="mb-4 flex items-center gap-3">
         <div className="flex-1">
-          <TabBar active={activeTab} counts={counts} onChange={setActiveTab} />
+          <TabBar tabs={SHOW_TABS} active={activeTab} counts={counts} onChange={setActiveTab} />
         </div>
         <div className="flex shrink-0 gap-1 text-xs">
           <button

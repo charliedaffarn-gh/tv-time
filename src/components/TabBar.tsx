@@ -1,21 +1,19 @@
-import type { ShowStatus } from '../types'
-
-const TABS: { key: ShowStatus; label: string }[] = [
-  { key: 'watching', label: 'Watching' },
-  { key: 'library', label: 'Library' },
-  { key: 'finished', label: 'Finished' },
-]
-
-interface TabBarProps {
-  active: ShowStatus
-  counts: Record<ShowStatus, number>
-  onChange: (status: ShowStatus) => void
+interface Tab<T extends string> {
+  key: T
+  label: string
 }
 
-export function TabBar({ active, counts, onChange }: TabBarProps) {
+interface TabBarProps<T extends string> {
+  tabs: Tab<T>[]
+  active: T
+  counts: Record<T, number>
+  onChange: (key: T) => void
+}
+
+export function TabBar<T extends string>({ tabs, active, counts, onChange }: TabBarProps<T>) {
   return (
     <div className="flex gap-1 rounded-lg bg-neutral-900 p-1">
-      {TABS.map((tab) => (
+      {tabs.map((tab) => (
         <button
           key={tab.key}
           onClick={() => onChange(tab.key)}
