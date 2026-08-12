@@ -32,7 +32,7 @@ export function GenreResultsList({
       {loading && <p className="text-sm text-neutral-500">Loading…</p>}
       {error && <p className="text-sm text-red-400">{error}</p>}
       {!loading && !error && items.length === 0 && (
-        <p className="text-sm text-neutral-500">No shows found in {genreName}.</p>
+        <p className="text-sm text-neutral-500">Nothing found in {genreName}.</p>
       )}
       <ul className="space-y-1">
         {items.map((show) => (
