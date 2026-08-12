@@ -11,16 +11,25 @@ const SECTIONS: Section[] = [
   {
     heading: 'Tracking your shows',
     items: [
-      'Two tabs at the bottom: My TV for everything you\'re tracking, and What to watch for finding something new.',
+      'Three tabs at the bottom: My TV and My Films for everything you\'re tracking, and What to watch for finding something new.',
       'Three lists on My TV: Library (heard about it, not started), Watching, and Finished.',
       'Add a show by searching for it — poster art and details come in automatically.',
     ],
   },
   {
+    heading: 'Tracking your films',
+    items: [
+      'Two lists on My Films: To Watch and Watched — films don\'t have episode-by-episode progress, so there\'s no separate "watching" state like TV has.',
+      'Add a film by searching for it, same as shows — poster art and details come in automatically.',
+      'Mark a film watched, or move it back to To Watch, any time.',
+    ],
+  },
+  {
     heading: 'What to watch',
     items: [
-      'Browse Trending, Popular, and Top Rated shows, or tap a genre to see what\'s in it.',
-      'One-tap add straight to your Library, same as Similar Shows.',
+      'Switch between TV and Films with the toggle at the top.',
+      'Browse Trending, Popular, and Top Rated, or tap a genre to see what\'s in it.',
+      'One-tap add straight into your list, same as Similar Shows or Similar Films.',
     ],
   },
   {
@@ -56,6 +65,10 @@ const SECTIONS: Section[] = [
       "Share any show with another account on the app — they'll see it waiting for them and can add it to their own list in one tap.",
       "Everyone's list stays private otherwise — nothing else is shared or synced.",
     ],
+  },
+  {
+    heading: 'Feedback',
+    items: ['Spotted a bug or have an idea? Tap Feedback in the header to send it through.'],
   },
   {
     heading: 'Install it as an app',
