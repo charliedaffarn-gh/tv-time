@@ -17,6 +17,23 @@ function TvIcon({ className }: { className?: string }) {
   )
 }
 
+function FilmIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect x="3" y="8" width="18" height="12" rx="2" />
+      <path d="M4 8l1.5-4h3L7 8M9.5 8L11 4h3l-1.5 4M15 8l1.5-4h3L18 8" />
+    </svg>
+  )
+}
+
 function CompassIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -36,6 +53,7 @@ function CompassIcon({ className }: { className?: string }) {
 
 const ITEMS: { to: string; end: boolean; label: string; Icon: typeof TvIcon }[] = [
   { to: '/', end: true, label: 'My TV', Icon: TvIcon },
+  { to: '/films', end: false, label: 'My Films', Icon: FilmIcon },
   { to: '/discover', end: false, label: 'What to watch', Icon: CompassIcon },
 ]
 

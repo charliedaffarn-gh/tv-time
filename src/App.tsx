@@ -6,6 +6,8 @@ import { LoginPage } from './components/LoginPage'
 import { AppLayout } from './components/AppLayout'
 import { Dashboard } from './components/Dashboard'
 import { DiscoverPage } from './components/DiscoverPage'
+import { FilmDetailPage } from './components/FilmDetailPage'
+import { MyFilmsPage } from './components/MyFilmsPage'
 import { ShowDetailPage } from './components/ShowDetailPage'
 
 function AppRoutes() {
@@ -22,6 +24,7 @@ function AppRoutes() {
         }
       >
         <Route path="/" element={<Dashboard />} />
+        <Route path="/films" element={<MyFilmsPage />} />
         <Route path="/discover" element={<DiscoverPage />} />
       </Route>
       <Route
@@ -29,6 +32,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ShowDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/film/:tmdbId"
+        element={
+          <ProtectedRoute>
+            <FilmDetailPage />
           </ProtectedRoute>
         }
       />
