@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { tmdbFetch } from '../_lib/tmdb.js'
+import { tmdbFetch, parseMediaType, normalizeResultsBody } from '../_lib/tmdb.js'
 import { getAuthedUserId } from '../_lib/auth.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -14,10 +14,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
+  const type = parseMediaType(req.query.type)
+
   try {
-    const { status, body } = await tmdbFetch('/trending/tv/week')
+    const { status, body } = await tmdbFetch(`/trending/${type}/week`)
     res.setHeader('Cache-Control', 'private, max-age=3600')
-    res.status(status).json(body)
+    res.status(status).json(normalizeResultsBody(body, type))
   } catch {
     res.status(502).json({ error: 'TMDB request failed' })
   }

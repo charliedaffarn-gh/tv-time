@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { tmdbFetch } from '../_lib/tmdb.js'
+import { tmdbFetch, parseMediaType } from '../_lib/tmdb.js'
 import { getAuthedUserId } from '../_lib/auth.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -14,8 +14,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
+  const type = parseMediaType(req.query.type)
+
   try {
-    const { status, body } = await tmdbFetch('/genre/tv/list')
+    const { status, body } = await tmdbFetch(`/genre/${type}/list`)
     res.setHeader('Cache-Control', 'private, max-age=86400')
     res.status(status).json(body)
   } catch {

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { tmdbFetch } from '../_lib/tmdb.js'
+import { tmdbFetch, parseMediaType, normalizeResultsBody } from '../_lib/tmdb.js'
 import { getAuthedUserId } from '../_lib/auth.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -19,11 +19,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(400).json({ error: 'Missing query parameter' })
     return
   }
+  const type = parseMediaType(req.query.type)
 
   try {
-    const { status, body } = await tmdbFetch('/search/tv', { query })
+    const { status, body } = await tmdbFetch(`/search/${type}`, { query })
     res.setHeader('Cache-Control', 'private, max-age=300')
-    res.status(status).json(body)
+    res.status(status).json(normalizeResultsBody(body, type))
   } catch {
     res.status(502).json({ error: 'TMDB request failed' })
   }

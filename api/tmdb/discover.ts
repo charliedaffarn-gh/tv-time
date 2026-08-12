@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { tmdbFetch } from '../_lib/tmdb.js'
+import { tmdbFetch, parseMediaType, normalizeResultsBody } from '../_lib/tmdb.js'
 import { getAuthedUserId } from '../_lib/auth.js'
 
 const ALLOWED_SORTS = new Set(['popularity.desc', 'vote_average.desc'])
@@ -19,6 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const genre = typeof req.query.with_genres === 'string' ? req.query.with_genres : ''
   const sortBy = typeof req.query.sort_by === 'string' ? req.query.sort_by : ''
   const voteCountGte = typeof req.query.vote_count_gte === 'string' ? req.query.vote_count_gte : ''
+  const type = parseMediaType(req.query.type)
 
   if (genre && !/^\d+$/.test(genre)) {
     res.status(400).json({ error: 'Invalid with_genres' })
@@ -36,9 +37,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (voteCountGte) params['vote_count.gte'] = voteCountGte
 
   try {
-    const { status, body } = await tmdbFetch('/discover/tv', params)
+    const { status, body } = await tmdbFetch(`/discover/${type}`, params)
     res.setHeader('Cache-Control', 'private, max-age=3600')
-    res.status(status).json(body)
+    res.status(status).json(normalizeResultsBody(body, type))
   } catch {
     res.status(502).json({ error: 'TMDB request failed' })
   }

@@ -1,5 +1,11 @@
 import { supabase } from './supabase'
-import type { TmdbSearchResult, TmdbShowDetails, TmdbSeasonDetails, TmdbGenre } from '../types'
+import type {
+  TmdbSearchResult,
+  TmdbShowDetails,
+  TmdbSeasonDetails,
+  TmdbGenre,
+  TmdbMovieDetails,
+} from '../types'
 
 async function authedFetch<T>(path: string): Promise<T> {
   const { data } = await supabase.auth.getSession()
@@ -30,7 +36,7 @@ export function isShowConcluded(status: string): boolean {
 }
 
 export function searchShows(query: string): Promise<{ results: TmdbSearchResult[] }> {
-  return authedFetch(`/api/tmdb/search?query=${encodeURIComponent(query)}`)
+  return authedFetch(`/api/tmdb/search?type=tv&query=${encodeURIComponent(query)}`)
 }
 
 export function getShowDetails(tmdbId: number): Promise<TmdbShowDetails> {
@@ -42,25 +48,59 @@ export function getSeasonEpisodes(tmdbId: number, season: number): Promise<TmdbS
 }
 
 export function getRecommendations(tmdbId: number): Promise<{ results: TmdbSearchResult[] }> {
-  return authedFetch(`/api/tmdb/recommendations?id=${tmdbId}`)
+  return authedFetch(`/api/tmdb/recommendations?type=tv&id=${tmdbId}`)
 }
 
 export function getGenres(): Promise<{ genres: TmdbGenre[] }> {
-  return authedFetch('/api/tmdb/genres')
+  return authedFetch('/api/tmdb/genres?type=tv')
 }
 
 export function getTrending(): Promise<{ results: TmdbSearchResult[] }> {
-  return authedFetch('/api/tmdb/trending')
+  return authedFetch('/api/tmdb/trending?type=tv')
 }
 
 export function getPopular(): Promise<{ results: TmdbSearchResult[] }> {
-  return authedFetch('/api/tmdb/popular')
+  return authedFetch('/api/tmdb/popular?type=tv')
 }
 
 export function getTopRated(): Promise<{ results: TmdbSearchResult[] }> {
-  return authedFetch('/api/tmdb/discover?sort_by=vote_average.desc&vote_count_gte=300')
+  return authedFetch('/api/tmdb/discover?type=tv&sort_by=vote_average.desc&vote_count_gte=300')
 }
 
 export function getShowsByGenre(genreId: number): Promise<{ results: TmdbSearchResult[] }> {
-  return authedFetch(`/api/tmdb/discover?with_genres=${genreId}`)
+  return authedFetch(`/api/tmdb/discover?type=tv&with_genres=${genreId}`)
+}
+
+export function searchMovies(query: string): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch(`/api/tmdb/search?type=movie&query=${encodeURIComponent(query)}`)
+}
+
+export function getMovieDetails(tmdbId: number): Promise<TmdbMovieDetails> {
+  return authedFetch(`/api/tmdb/movie?id=${tmdbId}`)
+}
+
+export function getMovieRecommendations(tmdbId: number): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch(`/api/tmdb/recommendations?type=movie&id=${tmdbId}`)
+}
+
+export function getMovieGenres(): Promise<{ genres: TmdbGenre[] }> {
+  return authedFetch('/api/tmdb/genres?type=movie')
+}
+
+export function getTrendingMovies(): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch('/api/tmdb/trending?type=movie')
+}
+
+export function getPopularMovies(): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch('/api/tmdb/popular?type=movie')
+}
+
+export function getTopRatedMovies(): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch(
+    '/api/tmdb/discover?type=movie&sort_by=vote_average.desc&vote_count_gte=3000',
+  )
+}
+
+export function getMoviesByGenre(genreId: number): Promise<{ results: TmdbSearchResult[] }> {
+  return authedFetch(`/api/tmdb/discover?type=movie&with_genres=${genreId}`)
 }

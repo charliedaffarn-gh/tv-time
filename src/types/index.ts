@@ -44,6 +44,7 @@ export interface TmdbSearchResult {
   poster_path: string | null
   first_air_date: string | null
   overview: string
+  media_type: 'tv' | 'movie'
 }
 
 export interface TmdbSeasonSummary {
@@ -100,3 +101,46 @@ export interface TmdbGenre {
   id: number
   name: string
 }
+
+export interface TmdbMovieDetails {
+  id: number
+  title: string
+  overview: string
+  poster_path: string | null
+  backdrop_path: string | null
+  status: string
+  vote_average: number
+  vote_count: number
+  genres: { id: number; name: string }[]
+  release_date: string | null
+  runtime: number | null
+  imdb_id: string | null
+  'watch/providers'?: { results: Record<string, TmdbWatchProviderRegion> }
+}
+
+export type FilmStatus = 'to_watch' | 'watched'
+
+export interface UserFilm {
+  id: string
+  user_id: string
+  tmdb_id: number
+  title: string
+  poster_path: string | null
+  status: FilmStatus
+  created_at: string
+  updated_at: string
+}
+
+export interface FilmShare {
+  id: string
+  from_user_id: string
+  to_user_id: string
+  tmdb_id: number
+  title: string
+  poster_path: string | null
+  status: ShareStatus
+  created_at: string
+  from_profile: { display_name: string } | null
+}
+
+export type MediaCardView = 'grid' | 'list'
