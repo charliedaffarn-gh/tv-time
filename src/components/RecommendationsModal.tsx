@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react'
-import { getRecommendations } from '../lib/tmdb'
-import { listUserShows } from '../lib/shows'
 import { MediaQuickAddItem, type MediaQuickAddState } from './MediaQuickAddItem'
 import type { TmdbSearchResult } from '../types'
 
@@ -8,10 +6,19 @@ interface RecommendationsModalProps {
   onClose: () => void
   tmdbId: number
   title: string
-  onAdd: (show: TmdbSearchResult) => Promise<{ error: string | null }>
+  onAdd: (item: TmdbSearchResult) => Promise<{ error: string | null }>
+  fetchRecommendations: (tmdbId: number) => Promise<{ results: TmdbSearchResult[] }>
+  fetchExisting: () => Promise<{ tmdb_id: number }[]>
 }
 
-export function RecommendationsModal({ onClose, tmdbId, title, onAdd }: RecommendationsModalProps) {
+export function RecommendationsModal({
+  onClose,
+  tmdbId,
+  title,
+  onAdd,
+  fetchRecommendations,
+  fetchExisting,
+}: RecommendationsModalProps) {
   const [results, setResults] = useState<TmdbSearchResult[]>([])
   const [existingTmdbIds, setExistingTmdbIds] = useState<Set<number>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -20,24 +27,24 @@ export function RecommendationsModal({ onClose, tmdbId, title, onAdd }: Recommen
   const [addedIds, setAddedIds] = useState<Set<number>>(new Set())
 
   useEffect(() => {
-    Promise.all([getRecommendations(tmdbId), listUserShows()])
-      .then(([recs, shows]) => {
+    Promise.all([fetchRecommendations(tmdbId), fetchExisting()])
+      .then(([recs, items]) => {
         setResults(recs.results)
-        setExistingTmdbIds(new Set(shows.map((s) => s.tmdb_id)))
+        setExistingTmdbIds(new Set(items.map((i) => i.tmdb_id)))
       })
       .catch(() => setError('Could not load recommendations.'))
       .finally(() => setLoading(false))
-  }, [tmdbId])
+  }, [tmdbId, fetchRecommendations, fetchExisting])
 
-  async function handleAddClick(show: TmdbSearchResult) {
-    setAddingId(show.id)
+  async function handleAddClick(item: TmdbSearchResult) {
+    setAddingId(item.id)
     setError(null)
-    const { error } = await onAdd(show)
+    const { error } = await onAdd(item)
     setAddingId(null)
     if (error) {
       setError(error)
     } else {
-      setAddedIds((prev) => new Set(prev).add(show.id))
+      setAddedIds((prev) => new Set(prev).add(item.id))
     }
   }
 
@@ -58,24 +65,24 @@ export function RecommendationsModal({ onClose, tmdbId, title, onAdd }: Recommen
         {loading && <p className="text-sm text-neutral-500">Loading…</p>}
         {error && <p className="text-sm text-red-400">{error}</p>}
         {!loading && !error && results.length === 0 && (
-          <p className="text-sm text-neutral-500">No recommendations found for this show.</p>
+          <p className="text-sm text-neutral-500">No recommendations found.</p>
         )}
 
         <ul className="max-h-96 space-y-1 overflow-y-auto">
-          {results.map((show) => {
+          {results.map((item) => {
             const state: MediaQuickAddState =
-              existingTmdbIds.has(show.id) || addedIds.has(show.id)
+              existingTmdbIds.has(item.id) || addedIds.has(item.id)
                 ? 'added'
-                : addingId === show.id
+                : addingId === item.id
                   ? 'adding'
                   : 'idle'
             return (
               <MediaQuickAddItem
-                key={show.id}
-                show={show}
+                key={item.id}
+                show={item}
                 layout="row"
                 state={state}
-                onAdd={() => handleAddClick(show)}
+                onAdd={() => handleAddClick(item)}
               />
             )
           })}

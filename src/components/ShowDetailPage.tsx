@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   addShow,
   getUserShowByTmdbId,
+  listUserShows,
   listWatchedEpisodesForShow,
   markEpisodeUnwatched,
   markEpisodeWatched,
@@ -13,7 +14,7 @@ import {
 import { useShowDetails } from '../hooks/useShowDetails'
 import { fetchSeasonEpisodesCached } from '../lib/tmdbCache'
 import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
-import { isShowConcluded, posterUrl, WATCH_REGION } from '../lib/tmdb'
+import { getRecommendations, isShowConcluded, posterUrl, WATCH_REGION } from '../lib/tmdb'
 import { MediaInfoBlock } from './MediaInfoBlock'
 import { RecommendationsModal } from './RecommendationsModal'
 import { ShareModal } from './ShareModal'
@@ -266,6 +267,8 @@ export function ShowDetailPage() {
               tmdbId={userShow.tmdb_id}
               title={userShow.title}
               onAdd={handleAddRecommendation}
+              fetchRecommendations={getRecommendations}
+              fetchExisting={listUserShows}
             />
           )}
 
