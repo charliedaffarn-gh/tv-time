@@ -14,6 +14,7 @@ import { useShowDetails } from '../hooks/useShowDetails'
 import { fetchSeasonEpisodesCached } from '../lib/tmdbCache'
 import { computeNextEpisode, episodeKey } from '../lib/nextEpisode'
 import { isShowConcluded, posterUrl, WATCH_REGION } from '../lib/tmdb'
+import { MediaInfoBlock } from './MediaInfoBlock'
 import { RecommendationsModal } from './RecommendationsModal'
 import { ShareModal } from './ShareModal'
 import type { ShowStatus, TmdbEpisodeRef, TmdbSearchResult, UserShow } from '../types'
@@ -169,7 +170,6 @@ export function ShowDetailPage() {
     return <div className="p-8 text-center text-neutral-500">Loading…</div>
   }
 
-  const backdrop = posterUrl(details.backdrop_path, 'w500')
   const realSeasons = details.seasons
     .filter((s) => s.season_number >= 1 && s.episode_count > 0)
     .sort((a, b) => a.season_number - b.season_number)
@@ -182,61 +182,18 @@ export function ShowDetailPage() {
         ← Back
       </Link>
 
-      {backdrop && <img src={backdrop} alt="" className="mb-4 w-full rounded-xl object-cover" />}
-
-      <h1 className="text-2xl font-semibold text-neutral-100">{details.name}</h1>
-
-      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-neutral-400">
-        <span>{details.status}</span>
-        {details.vote_average > 0 && (
-          <span>
-            ★ {details.vote_average.toFixed(1)}{' '}
-            <span className="text-neutral-500">({details.vote_count.toLocaleString()} votes)</span>
-          </span>
-        )}
-        {details.genres.length > 0 && <span>{details.genres.map((g) => g.name).join(', ')}</span>}
-        {details.networks.length > 0 && (
-          <span>{details.networks.map((n) => n.name).join(', ')}</span>
-        )}
-        {imdbId && (
-          <a
-            href={`https://www.imdb.com/title/${imdbId}/`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-indigo-400 hover:underline"
-          >
-            View on IMDb ↗
-          </a>
-        )}
-      </div>
-
-      {details.overview && <p className="mt-3 text-sm text-neutral-300">{details.overview}</p>}
-
-      {watchProviders && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          {(watchProviders.flatrate ?? []).map((provider) => {
-            const logo = posterUrl(provider.logo_path, 'w92')
-            return logo ? (
-              <img
-                key={provider.provider_name}
-                src={logo}
-                alt={provider.provider_name}
-                title={provider.provider_name}
-                className="h-8 w-8 rounded-md"
-              />
-            ) : null
-          })}
-          <a
-            href={watchProviders.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-indigo-400 hover:underline"
-          >
-            Where to watch ↗
-          </a>
-          <span className="text-xs text-neutral-600">(streaming data via JustWatch)</span>
-        </div>
-      )}
+      <MediaInfoBlock
+        title={details.name}
+        backdropPath={details.backdrop_path}
+        overview={details.overview}
+        status={details.status}
+        voteAverage={details.vote_average}
+        voteCount={details.vote_count}
+        genres={details.genres}
+        secondaryChips={details.networks.map((n) => n.name)}
+        imdbId={imdbId ?? null}
+        watchProviders={watchProviders}
+      />
 
       {userShow === null ? (
         <div className="mt-4">
