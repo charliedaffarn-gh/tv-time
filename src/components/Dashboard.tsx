@@ -175,6 +175,19 @@ export function Dashboard() {
       return 0
     })
   }
+
+  // On Watching, everything already caught up (tier 1 or 2) sits below a
+  // divider, separate from shows that actually have something new to watch
+  // (tier 0). visibleShows is already tier-sorted above, so this is just
+  // finding where tier 0 ends. Other tabs have no tiers, so splitIndex stays
+  // -1 and caughtUpShows stays empty -- no divider, unchanged behavior.
+  const splitIndex =
+    activeTab === 'watching'
+      ? visibleShows.findIndex((s) => (watchingOrder.get(s.id)?.tier ?? 0) !== 0)
+      : -1
+  const actionableShows = splitIndex === -1 ? visibleShows : visibleShows.slice(0, splitIndex)
+  const caughtUpShows = splitIndex === -1 ? [] : visibleShows.slice(splitIndex)
+
   const existingTmdbIds = new Set(shows.map((s) => s.tmdb_id))
   const emptySet: Set<string> = new Set()
 
@@ -242,7 +255,28 @@ export function Dashboard() {
               : 'flex flex-col gap-2'
           }`}
         >
-          {visibleShows.map((show) => (
+          {actionableShows.map((show) => (
+            <ShowCard
+              key={show.id}
+              show={show}
+              view={view}
+              watched={watchedByShow.get(show.id) ?? emptySet}
+              onStartWatching={() => handleStartWatching(show.id)}
+              onMarkWatched={(season, episode) => handleMarkWatched(show.id, season, episode)}
+              onMoveToLibrary={() => handleMoveToLibrary(show.id)}
+              onRemove={() => handleRemove(show.id)}
+            />
+          ))}
+
+          {actionableShows.length > 0 && caughtUpShows.length > 0 && (
+            <div className="col-span-full my-1 flex items-center gap-3">
+              <div className="h-px flex-1 bg-neutral-800" />
+              <span className="shrink-0 text-xs font-medium text-neutral-500">Caught up</span>
+              <div className="h-px flex-1 bg-neutral-800" />
+            </div>
+          )}
+
+          {caughtUpShows.map((show) => (
             <ShowCard
               key={show.id}
               show={show}
